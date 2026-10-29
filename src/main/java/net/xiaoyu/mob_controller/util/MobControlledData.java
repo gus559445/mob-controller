@@ -141,9 +141,6 @@ public class MobControlledData {
 
         setLegionMode(mob, false);
 
-        // 解除控制后它就不再是我们的伙伴了，把 Dominion 那边的标签一并擦掉
-        net.xiaoyu.mob_controller.compat.dominion.DominionCompat.unmarkPet(mob);
-
         LazyOptional<MobControlCapability> capability = mob.getCapability(MobControlCapabilityProvider.MOB_CONTROL_CAPABILITY);
         capability.ifPresent(cap -> {
             cap.setControllerUUID(null);

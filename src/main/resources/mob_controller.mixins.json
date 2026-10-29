@@ -94,8 +94,7 @@
     "cataclysm.MixinAncientRemnantNoRespawner",
     "cataclysm.MixinNetheriteMonstrosityNoRespawner",
     "cataclysm.MixinScyllaNoRespawner",
-    "cataclysm.MixinMaledictusNoRespawner",
-    "dominion.DominionCompanionRegistryMixin"
+    "cataclysm.MixinMaledictusNoRespawner"
   ],
   "client": [
   ],

@@ -74,8 +74,10 @@ public class MobController {
         net.xiaoyu.mob_controller.config.ItemConfig.register();
         net.xiaoyu.mob_controller.config.FeatureConfig.register();
         net.xiaoyu.mob_controller.config.RidingConfig.register();
+        net.xiaoyu.mob_controller.config.AiChatConfig.register();
         ClientConfig.register();
         MinecraftForge.EVENT_BUS.register(MobControllerEvent.class);
+        MinecraftForge.EVENT_BUS.register(net.xiaoyu.mob_controller.event.AiChatHandler.class);
         eventBus.register(MobControlCapabilityRegister.class);
         NetWorkManager.register();
         net.minecraftforge.common.crafting.CraftingHelper.register(ConfigRecipeCondition.Serializer.INSTANCE);

@@ -59,6 +59,9 @@ public class NetWorkManager {
                 PlayerJumpPacket::new, PlayerJumpPacket::handle);
         INSTANCE.registerMessage(id++, SyncWaxedPacket.class, SyncWaxedPacket::toBytes,
                 SyncWaxedPacket::new, SyncWaxedPacket::handle);
+
+        INSTANCE.registerMessage(id++, AiChatTargetPacket.class, AiChatTargetPacket::toBytes,
+                AiChatTargetPacket::new, AiChatTargetPacket::handle);
         INSTANCE.registerMessage(id++, SyncChilledPacket.class, SyncChilledPacket::toBytes,
                 SyncChilledPacket::new, SyncChilledPacket::handle);
     }
