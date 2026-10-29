@@ -37,7 +37,6 @@ public class ModItems {
             .nutrition(0)
             .saturationMod(0.0F)
             .alwaysEat()
-            .fastFood()
             .build();
 
     /**

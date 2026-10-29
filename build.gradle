@@ -241,8 +241,9 @@ dependencies {
     modImplementation("curse.maven:alexs-mobs-426558:5698791")         // Alex 的生物
     modImplementation("curse.maven:lendercataclysm-551586:6729683")    // 灾变
     modImplementation("curse.maven:lionfish-api-1001614:5922047")      // 灾变前置
-    // 天境：编译期只要那几个 boss 类
+    // 天境 / Goety（祸乱鬼魅）：编译期只要那几个类
     compileOnly("maven.modrinth:aether:1.20.1-1.5.2-neoforge")
+    compileOnly("maven.modrinth:goety:2.5.60.0")
 }
 
 mixin {
