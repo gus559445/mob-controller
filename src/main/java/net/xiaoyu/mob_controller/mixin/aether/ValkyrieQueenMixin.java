@@ -16,25 +16,37 @@ import java.util.Objects;
 public class ValkyrieQueenMixin {
 
     /**
-     * 注入 {@code Mob#mobInteract}。
+     * 正式游戏（SRG 名）里的注入点：{@code Mob#mobInteract} 被混淆成 {@code m_6071_}。
      *
-     * <p>这里必须把两个名字都写上：开发环境里 Minecraft 方法叫 {@code mobInteract}，
-     * 而正式游戏里是 SRG 名 {@code m_6071_}。refmap 只会映射原版类身上的方法，
-     * 目标类是 Aether 的 {@code ValkyrieQueen}（继承来的 mobInteract 不在映射表里），
-     * 于是运行时拿着 {@code mobInteract} 这个名字找不到任何目标 ——
-     * mixin 配置是 {@code required: true} + {@code defaultRequire: 1}，一失败就是整包启动崩溃。</p>
-     *
-     * <p>{@code require = 0} 是最后一道保险：Aether 换版本、方法被挪走时只记一条日志，
-     * 不让游戏跟着陪葬。</p>
+     * <p>{@code remap = false} 让 mixin 别去查映射表——这个类名不属于原版，
+     * 注解处理器查不到映射会直接 `error: Unable to locate obfuscation mapping`。</p>
      */
-    @Inject(method = {"mobInteract", "m_6071_"}, at = @At("HEAD"), cancellable = true, require = 0)
+    @Inject(method = "m_6071_", at = @At("HEAD"), cancellable = true, remap = false, require = 0)
+    private void onMobInteractSrg(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        cancelTradeWhenControlled(player, cir);
+    }
+
+    /**
+     * 开发环境的注入点：方法保持官方名 {@code mobInteract}。
+     *
+     * <p>两条都写是因为 refmap 只映射原版类身上的方法，目标类 {@code ValkyrieQueen}
+     * 继承来的同名方法不在映射表里，生产环境拿着 {@code mobInteract} 找目标必然落空；
+     * 而 mixin 配置是 {@code required: true} + {@code defaultRequire: 1}，
+     * 一失败整个游戏启动就崩（就是 1.1.5 那次崩的现场）。
+     * 现在两边各自 {@code require = 0}，哪边对不上都只记一条日志。</p>
+     */
+    @Inject(method = "mobInteract", at = @At("HEAD"), cancellable = true, require = 0)
     private void onMobInteract(Player player, InteractionHand hand, CallbackInfoReturnable<InteractionResult> cir) {
+        cancelTradeWhenControlled(player, cir);
+    }
+
+    /** 女王已被当前玩家控制时，拦住原版那段对话，直接返回 PASS。 */
+    private void cancelTradeWhenControlled(Player player, CallbackInfoReturnable<InteractionResult> cir) {
         ValkyrieQueen queen = (ValkyrieQueen) (Object) this;
 
-        // 如果女王已被当前玩家控制，则阻止弹出对话
+        // 直接返回 PASS，不影响其他物品的交互（如装备编辑蓝图）
         if (MobControlledData.isControlledEntity(queen) &&
                 Objects.equals(MobControlledData.getControllerUUID(queen), player.getUUID())) {
-            // 直接返回 PASS，不影响其他物品的交互（如装备编辑蓝图）
             cir.setReturnValue(InteractionResult.PASS);
         }
     }
