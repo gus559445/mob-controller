@@ -1,0 +1,65 @@
+package net.xiaoyu.mob_controller.network;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.simple.SimpleChannel;
+import net.xiaoyu.mob_controller.MobController;
+
+/**
+ * 本模组网络通道管理器，负责创建 {@link SimpleChannel} 并注册所有自定义数据包。
+ *
+ * <p>当前协议版本固定为 {@code 1}，客户端与服务端版本必须一致才允许连接。</p>
+ */
+
+public class NetWorkManager {
+    /**
+     * 网络协议版本号。
+     */
+    public static final String PROTOCOL_VERSION = "1";
+    /**
+     * 本模组网络通道实例。
+     */
+    public static final SimpleChannel INSTANCE = NetworkRegistry.newSimpleChannel(
+        new ResourceLocation(MobController.MOD_ID, "control_mode_toggle"),
+        () -> PROTOCOL_VERSION,
+        PROTOCOL_VERSION::equals,
+        PROTOCOL_VERSION::equals
+    );
+
+    /**
+     * 注册本模组全部网络数据包。
+     *
+     * <p>注册顺序决定包 ID，请保持稳定以避免协议不兼容。</p>
+     */
+    public static void register() {
+        int id = 0;
+        INSTANCE.registerMessage(id++, ToggleControlModePacket.class, ToggleControlModePacket::toBytes,
+                ToggleControlModePacket::new, ToggleControlModePacket::handle);
+        INSTANCE.registerMessage(id++, MobControlCapabilitySyncPacket.class, MobControlCapabilitySyncPacket::toBytes,
+                MobControlCapabilitySyncPacket::new, MobControlCapabilitySyncPacket::handle);
+        INSTANCE.registerMessage(id++, ApplyControlCommandPacket.class, ApplyControlCommandPacket::toBytes,
+                ApplyControlCommandPacket::new, ApplyControlCommandPacket::handle);
+        INSTANCE.registerMessage(id++, SwitchAggressiveModePacket.class, SwitchAggressiveModePacket::toBytes,
+                SwitchAggressiveModePacket::new, SwitchAggressiveModePacket::handle);
+        INSTANCE.registerMessage(id++, PlaySoundPacket.class, PlaySoundPacket::toBytes,
+                PlaySoundPacket::new, PlaySoundPacket::handle);
+        INSTANCE.registerMessage(id++, SyncSelectedModePacket.class, SyncSelectedModePacket::toBytes,
+                SyncSelectedModePacket::new, SyncSelectedModePacket::handle);
+        INSTANCE.registerMessage(id++, UpdateLegionColorPacket.class, UpdateLegionColorPacket::toBytes,
+                UpdateLegionColorPacket::new, UpdateLegionColorPacket::handle);
+        INSTANCE.registerMessage(id++, LegionModeBatchPacket.class, LegionModeBatchPacket::toBytes,
+                LegionModeBatchPacket::new, LegionModeBatchPacket::handle);
+        INSTANCE.registerMessage(id++, SyncLegionColorPacket.class, SyncLegionColorPacket::toBytes,
+                SyncLegionColorPacket::new, SyncLegionColorPacket::handle);
+        INSTANCE.registerMessage(id++, SyncLegionModePacket.class, SyncLegionModePacket::toBytes,
+                SyncLegionModePacket::new, SyncLegionModePacket::handle);
+        INSTANCE.registerMessage(id++, TogglePlayerLegionModePacket.class, TogglePlayerLegionModePacket::toBytes,
+                TogglePlayerLegionModePacket::new, TogglePlayerLegionModePacket::handle);
+        INSTANCE.registerMessage(id++, PlayerJumpPacket.class, PlayerJumpPacket::toBytes,
+                PlayerJumpPacket::new, PlayerJumpPacket::handle);
+        INSTANCE.registerMessage(id++, SyncWaxedPacket.class, SyncWaxedPacket::toBytes,
+                SyncWaxedPacket::new, SyncWaxedPacket::handle);
+        INSTANCE.registerMessage(id++, SyncChilledPacket.class, SyncChilledPacket::toBytes,
+                SyncChilledPacket::new, SyncChilledPacket::handle);
+    }
+}

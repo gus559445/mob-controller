@@ -1,0 +1,29 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " W ",
+    "ACF",
+    " S "
+  ],
+  "key": {
+    "W": {
+      "item": "minecraft:wither_rose"
+    },
+    "F": {
+      "item": "minecraft:fermented_spider_eye"
+    },
+    "C": {
+      "item": "minecraft:suspicious_stew"
+    },
+    "S": {
+      "item": "minecraft:slime_ball"
+    },
+    "A": {
+      "item": "minecraft:rotten_flesh"
+    }
+  },
+  "result": {
+    "item": "mob_controller:heart_contract",
+    "count": 1
+  }
+}
