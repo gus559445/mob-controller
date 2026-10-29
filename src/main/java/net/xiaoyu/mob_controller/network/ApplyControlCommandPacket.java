@@ -57,7 +57,18 @@ public record ApplyControlCommandPacket(MobControlledData.ControlMode mode) {
             }
 
             int affectedCount = MobControllerItem.applyControlCommand(player, this.mode());
-            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.CONTROL_COMMAND_USE.get(), net.minecraft.sounds.SoundSource.PLAYERS, 0.2f, 1.0f);
+            // 一个受控生物都没有：别播哨声、也别报「[0] 跟随中」，直接说清楚没吹到人
+            if (affectedCount <= 0) {
+                MobControlUtil.showMessageToPlayer(
+                        player,
+                        Component.empty(),
+                        "mob_controller.message.no_controlled_mobs_nearby",
+                        new Object[]{},
+                        ChatFormatting.RED
+                );
+                return;
+            }
+            player.level().playSound(null, player.getX(), player.getY(), player.getZ(), ModSounds.CONTROL_COMMAND_USE.get(), net.minecraft.sounds.SoundSource.PLAYERS, 1.0f, 1.0f);
             String modeKey = "mob_controller.mode." + this.mode().toString().toLowerCase();
             MobControlUtil.showMessageToPlayer(
                     player,
@@ -67,10 +78,8 @@ public record ApplyControlCommandPacket(MobControlledData.ControlMode mode) {
                     ChatFormatting.GOLD
             );
             // 成就触发：使用控制令
-            if (affectedCount >= 1) {
-                MobControllerTriggers.USE_CONTROL_COMMAND.trigger(player);
-                MobController.grantRootAdvancementIfNeeded(player);
-            }
+            MobControllerTriggers.USE_CONTROL_COMMAND.trigger(player);
+            MobController.grantRootAdvancementIfNeeded(player);
         });
         ctx.get().setPacketHandled(true);
     }

@@ -5,7 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.network.NetworkEvent;
-import net.xiaoyu.mob_controller.item.ModeSelectControlCommandItem;
+import net.xiaoyu.mob_controller.item.WhistleItem;
 import net.xiaoyu.mob_controller.util.MobControlledData;
 
 import java.util.function.Supplier;
@@ -24,8 +24,9 @@ public record SyncSelectedModePacket(MobControlledData.ControlMode mode) {
             ServerPlayer player = ctx.get().getSender();
             if (player != null) {
                 ItemStack mainHand = player.getMainHandItem();
-                if (mainHand.getItem() instanceof ModeSelectControlCommandItem) {
-                    ModeSelectControlCommandItem.setSelectedMode(mainHand, mode);
+                // 两把驭兽哨都继承 WhistleItem，切模式后让服务端也记住，免得重登又跳回去
+                if (mainHand.getItem() instanceof WhistleItem whistle) {
+                    whistle.setMode(mainHand, mode);
                 }
             }
         });

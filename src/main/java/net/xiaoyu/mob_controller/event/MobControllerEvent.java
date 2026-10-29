@@ -350,18 +350,6 @@ public class MobControllerEvent {
             }
         }
 
-        // 控制令·切换模式版左键切换模式
-        else if (mainHand.getItem() instanceof ModeSelectControlCommandItem) {
-            if (!player.level().isClientSide) {
-                ModeSelectControlCommandItem.cycleSelectedMode(mainHand);
-                MobControlledData.ControlMode newMode = ModeSelectControlCommandItem.getSelectedMode(mainHand);
-                String modeKey = "mob_controller.mode." + newMode.toString().toLowerCase();
-                player.displayClientMessage(Component.translatable("mob_controller.message.mode_switched",
-                        Component.translatable(modeKey)).withStyle(ChatFormatting.GOLD), true);
-            }
-            event.setCanceled(true);
-        }
-
         // 竞技之旗左键生物：单体/批量启用军团模式
         else if (mainHand.getItem() instanceof LegionBannerItem) {
             if (target instanceof Mob mob && !player.level().isClientSide) {
@@ -840,22 +828,8 @@ public class MobControllerEvent {
 
         ItemStack mainHand = mc.player.getMainHandItem();
 
-        // 控制令逻辑（保持不变）
-        if (mainHand.is(ModItems.CONTROL_COMMAND_ITEM.get())) {
-            MobControlledData.ControlMode mode = switch (event.getButton()) {
-                case InputConstants.MOUSE_BUTTON_LEFT -> MobControlledData.ControlMode.FOLLOW;
-                case InputConstants.MOUSE_BUTTON_RIGHT -> MobControlledData.ControlMode.STAY;
-                case InputConstants.MOUSE_BUTTON_MIDDLE -> MobControlledData.ControlMode.WANDER;
-                default -> null;
-            };
-            if (mode != null) {
-                NetWorkManager.INSTANCE.sendToServer(new ApplyControlCommandPacket(mode));
-                // 播放使用动画
-                mc.player.swing(InteractionHand.MAIN_HAND);
-            }
-        }
         // 护主切换器逻辑（修改：支持批量切换）
-        else if (mainHand.is(ModItems.AGGRESSIVE_SWITCH_ITEM.get())) {
+        if (mainHand.is(ModItems.AGGRESSIVE_SWITCH_ITEM.get())) {
             int button = event.getButton();
             if (button != InputConstants.MOUSE_BUTTON_LEFT && button != InputConstants.MOUSE_BUTTON_RIGHT) {
                 return;
@@ -881,25 +855,6 @@ public class MobControllerEvent {
                     // 未瞄准有效受控生物，发送无效单体包（服务端会反馈消息）
                     NetWorkManager.INSTANCE.sendToServer(new SwitchAggressiveModePacket(aggressive, -2));
                 }
-            }
-        }
-        // 控制令·切换模式版（驭兽哨）逻辑
-        else if (mainHand.is(ModItems.MODE_SELECT_CONTROL_COMMAND_ITEM.get())) {
-            int button = event.getButton();
-            if (button == InputConstants.MOUSE_BUTTON_LEFT) {
-                ModeSelectControlCommandItem.cycleSelectedMode(mainHand);
-                MobControlledData.ControlMode newMode = ModeSelectControlCommandItem.getSelectedMode(mainHand);
-                // 发送同步包到服务端
-                NetWorkManager.INSTANCE.sendToServer(new SyncSelectedModePacket(newMode));
-                String modeKey = "mob_controller.mode." + newMode.toString().toLowerCase();
-                mc.player.displayClientMessage(Component.translatable("mob_controller.message.mode_switched",
-                        Component.translatable(modeKey)).withStyle(ChatFormatting.GOLD), true);
-                mc.player.swing(InteractionHand.MAIN_HAND);
-            } else if (button == InputConstants.MOUSE_BUTTON_RIGHT) {
-                // 右键：发送批量控制包（服务端执行）
-                MobControlledData.ControlMode mode = ModeSelectControlCommandItem.getSelectedMode(mainHand);
-                NetWorkManager.INSTANCE.sendToServer(new ApplyControlCommandPacket(mode));
-                mc.player.swing(InteractionHand.MAIN_HAND);
             }
         }
         // 竞技之旗逻辑
