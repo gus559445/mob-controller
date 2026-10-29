@@ -954,6 +954,9 @@ public class MobControlUtil {
             if (raid != null) raid.removeFromRaid(raider, true);
         }
         MobControlledData.addControlledMob(player.getUUID(), mob);
+        // 装了驯服万物（Dominion）时，顺手把它登记成那边的「伙伴」，
+        // 这样对着这只生物按它的聊天键就能用上 AI 聊天（它的服务端会校验这个主人标签）。
+        net.xiaoyu.mob_controller.compat.dominion.DominionCompat.markAsPet(mob, player.getUUID());
         if (!mob.level().isClientSide) {
             for (Entity entity : mob.level().getEntitiesOfClass(Entity.class, mob.getBoundingBox().inflate(32.0))) {
                 if (entity instanceof Mob other && MobControlledData.isControlledEntity(other)) {
