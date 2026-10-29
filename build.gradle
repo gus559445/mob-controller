@@ -244,6 +244,10 @@ dependencies {
     // 天境 / Goety（祸乱鬼魅）：编译期只要那几个类
     compileOnly("maven.modrinth:aether:1.20.1-1.5.2-neoforge")
     compileOnly("maven.modrinth:goety:2.5.60.0")
+    // 驯服万物（Dominion）：mixin/dominion 里按 targets 指向它的 CompanionRegistry，
+    // 注解处理器需要能在类路径上找到这个类，否则报 "Mixin target ... could not be found"。
+    // 这份 jar 是玩家提供的模组本体副本，只参与编译，不会打进产物。
+    compileOnly(files("libs/dominion-2.5.15.jar"))
 }
 
 mixin {
