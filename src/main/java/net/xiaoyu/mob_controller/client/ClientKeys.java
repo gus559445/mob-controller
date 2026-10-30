@@ -12,6 +12,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.xiaoyu.mob_controller.MobController;
+import net.xiaoyu.mob_controller.client.gui.AiChatConfigScreen;
 import net.xiaoyu.mob_controller.network.AiChatTargetPacket;
 import net.xiaoyu.mob_controller.network.NetWorkManager;
 import org.lwjgl.glfw.GLFW;
@@ -34,6 +35,14 @@ public final class ClientKeys {
             GLFW.GLFW_KEY_K,
             "key.categories.mob_controller");
 
+    /** 默认键位 J：打开 AI 聊天设置界面，省得手改 toml。 */
+    public static final KeyMapping AI_CONFIG = new KeyMapping(
+            "key.mob_controller.ai_config",
+            KeyConflictContext.IN_GAME,
+            InputConstants.Type.KEYSYM,
+            GLFW.GLFW_KEY_J,
+            "key.categories.mob_controller");
+
     private ClientKeys() {
     }
 
@@ -45,6 +54,7 @@ public final class ClientKeys {
         @SubscribeEvent
         public static void registerKeys(RegisterKeyMappingsEvent event) {
             event.register(AI_CHAT);
+            event.register(AI_CONFIG);
         }
     }
 
@@ -56,6 +66,9 @@ public final class ClientKeys {
         Minecraft minecraft = Minecraft.getInstance();
         if (minecraft.player == null || minecraft.level == null || minecraft.screen != null) {
             return;
+        }
+        while (AI_CONFIG.consumeClick()) {
+            minecraft.setScreen(new AiChatConfigScreen(null));
         }
         while (AI_CHAT.consumeClick()) {
             Entity aimed = minecraft.crosshairPickEntity;
