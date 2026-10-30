@@ -10,7 +10,9 @@ import net.minecraftforge.fml.config.ModConfig;
  * <p>走 OpenAI 兼容的 {@code /chat/completions} 接口，填个地址 + Key + 模型名就能用；
  * 换成中转站、本地 ollama（{@code http://127.0.0.1:11434/v1/chat/completions}）也一样。</p>
  *
- * <p>本配置文件位于：{@code mob_controller/mob_controller-ai-chat.toml}</p>
+ * <p>本配置文件位于：{@code config/mob_controller/mob_controller-ai-chat.toml}（COMMON 类型，
+ * 和其他几份配置放一起，填一次全局生效；SERVER 类型会跑到每个存档自己的 serverconfig 里，
+ * 每开新世界都要重填一遍，所以这里不用 SERVER）。</p>
  */
 public class AiChatConfig {
 
@@ -103,7 +105,7 @@ public class AiChatConfig {
      */
     public static void register() {
         ModLoadingContext.get()
-                .registerConfig(ModConfig.Type.SERVER, SPEC, "mob_controller/mob_controller-ai-chat.toml");
+                .registerConfig(ModConfig.Type.COMMON, SPEC, "mob_controller/mob_controller-ai-chat.toml");
     }
 
     /** 配置是否已经能真正发出请求（开关打开 + 有地址 + 有模型）。 */
