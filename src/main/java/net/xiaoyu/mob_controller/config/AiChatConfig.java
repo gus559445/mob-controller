@@ -59,7 +59,7 @@ public class AiChatConfig {
 
         API_URL = builder
                 .comment("OpenAI 兼容的 chat/completions 地址")
-                .define("api_url", "https://api.openai.com/v1/chat/completions");
+                .define("api_url", "https://api.deepseek.com/v1/chat/completions");
 
         API_KEY = builder
                 .comment("API Key；本地服务不需要可以留空")
@@ -67,15 +67,17 @@ public class AiChatConfig {
 
         MODEL = builder
                 .comment("模型名")
-                .define("model", "gpt-4o-mini");
+                .define("model", "deepseek-flash");
 
         TEMPERATURE = builder
                 .comment("采样温度，0~2")
                 .defineInRange("temperature", 0.8D, 0.0D, 2.0D);
 
         MAX_TOKENS = builder
-                .comment("单次回复最大 token")
-                .defineInRange("max_tokens", 200, 16, 4096);
+                .comment("单次回复最大 token",
+                        "注意：带推理的模型（DeepSeek-V4 系列、R1 等）会先花几十上百 token 在 reasoning 上，",
+                        "实测 200 会被思考吃光、回复被截断，建议 400~600")
+                .defineInRange("max_tokens", 500, 16, 4096);
 
         TIMEOUT_SECONDS = builder
                 .comment("请求超时秒数")

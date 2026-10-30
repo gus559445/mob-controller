@@ -54,7 +54,7 @@ public class AiChatConfigScreen extends Screen {
         y += ROW;
         modelBox = addField(x, y, width, AiChatConfig.MODEL.get(), "deepseek-chat");
         y += ROW;
-        tokensBox = addField(x, y, width, String.valueOf(AiChatConfig.MAX_TOKENS.get()), "200");
+        tokensBox = addField(x, y, width, String.valueOf(AiChatConfig.MAX_TOKENS.get()), "500");
         y += ROW;
         temperatureBox = addField(x, y, width, String.valueOf(AiChatConfig.TEMPERATURE.get()), "0.8");
         y += ROW;
