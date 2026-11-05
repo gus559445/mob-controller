@@ -117,6 +117,11 @@ public class FeatureConfig {
      */
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CONTROLLED_MINION_ENTITIES;
 
+    /**
+     * 受控生物（及其召唤物）引发的爆炸，是否不破坏方块。
+     */
+    public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
@@ -273,6 +278,13 @@ public class FeatureConfig {
                         "格式：实体注册名，例如 'mutantmore:rodling'；写 \"*\" 表示所有实体的召唤物都接管。",
                         "留空 = 只走自动识别。")
                 .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
+
+        builder.comment("");
+
+        CONTROLLED_MINION_EXPLOSION_NO_GRIEFING = builder
+                .comment("为 true 时，受控生物以及它的召唤物引发的爆炸不会破坏方块。",
+                        "只清掉方块破坏，伤害和击退照常 —— 苦力怕类召唤物自爆还是会炸伤生物，只是不再炸出坑。")
+                .define("controlled_minion_explosion_no_griefing", true);
 
         SPEC = builder.build();
     }

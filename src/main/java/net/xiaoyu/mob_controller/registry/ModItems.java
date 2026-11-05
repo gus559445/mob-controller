@@ -115,6 +115,14 @@ public class ModItems {
             () -> new ModeSelectControlCommandItem(new Item.Properties().stacksTo(1).food(TRIGGER_FOOD))
     );
 
+    /**
+     * 寻兽罗盘
+     */
+    public static final RegistryObject<Item> BEAST_COMPASS_ITEM = ITEMS.register(
+            "beast_compass",
+            () -> new BeastCompassItem(new Item.Properties().stacksTo(1))
+    );
+
     public static final RegistryObject<Item> LEGION_BANNER_ITEM = ITEMS.register(
             "legion_banner",
             () -> new LegionBannerItem(new Item.Properties().stacksTo(1))

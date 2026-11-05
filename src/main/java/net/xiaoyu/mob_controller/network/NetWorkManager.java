@@ -62,6 +62,14 @@ public class NetWorkManager {
 
         INSTANCE.registerMessage(id++, AiChatTargetPacket.class, AiChatTargetPacket::toBytes,
                 AiChatTargetPacket::new, AiChatTargetPacket::handle);
+        INSTANCE.registerMessage(id++, BeastCompassRequestPacket.class, BeastCompassRequestPacket::toBytes,
+                BeastCompassRequestPacket::new, BeastCompassRequestPacket::handle);
+        INSTANCE.registerMessage(id++, BeastCompassListPacket.class, BeastCompassListPacket::toBytes,
+                BeastCompassListPacket::new, BeastCompassListPacket::handle);
+        INSTANCE.registerMessage(id++, BeastCompassSelectPacket.class, BeastCompassSelectPacket::toBytes,
+                BeastCompassSelectPacket::new, BeastCompassSelectPacket::handle);
+        INSTANCE.registerMessage(id++, BeastCompassTrackPacket.class, BeastCompassTrackPacket::toBytes,
+                BeastCompassTrackPacket::new, BeastCompassTrackPacket::handle);
         INSTANCE.registerMessage(id++, SyncChilledPacket.class, SyncChilledPacket::toBytes,
                 SyncChilledPacket::new, SyncChilledPacket::handle);
     }

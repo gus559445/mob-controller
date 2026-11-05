@@ -66,6 +66,8 @@ public class CreativeTab {
                         output.accept(ModItems.ARMOR_EDITING_BLUEPRINT.get());
 
                         output.accept(ModItems.LEGION_BANNER_ITEM.get());
+                        // 寻兽罗盘
+                        output.accept(ModItems.BEAST_COMPASS_ITEM.get());
                     })
                     .build()
     );

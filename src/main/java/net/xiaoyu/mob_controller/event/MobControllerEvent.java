@@ -44,6 +44,7 @@ import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
+import net.minecraftforge.event.level.ExplosionEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.server.ServerAboutToStartEvent;
@@ -943,6 +944,36 @@ public class MobControllerEvent {
             } else if (MobControlledData.isControlledEntity(mob) && isValidCombatTarget(mob, event.getNewTarget())) {
                 MobControlledData.markCombat(mob);
             }
+        }
+    }
+
+    /**
+     * 寻兽罗盘：每 20 tick 给有追踪目标的玩家推一次位置。
+     */
+    @SubscribeEvent
+    public static void onServerTick(TickEvent.ServerTickEvent event) {
+        if (event.phase != TickEvent.Phase.END) {
+            return;
+        }
+        if (event.getServer().getTickCount() % 20 != 0) {
+            return;
+        }
+        net.xiaoyu.mob_controller.network.BeastCompassTracker.tick(event.getServer());
+    }
+
+    /**
+     * 受控生物及其召唤物的爆炸不炸方块（伤害与击退保留）。
+     */
+    @SubscribeEvent
+    public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
+        if (!Config.CONTROLLED_MINION_EXPLOSION_NO_GRIEFING.get()) {
+            return;
+        }
+        if (!(event.getExplosion().getDirectSourceEntity() instanceof Mob mob)) {
+            return;
+        }
+        if (MobControlledData.isControlledEntity(mob) || ControlledMinionHelper.isControlledMinion(mob)) {
+            event.getAffectedBlocks().clear();
         }
     }
 
