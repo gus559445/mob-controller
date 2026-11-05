@@ -6,7 +6,7 @@
   "overrides": [
     {
       "predicate": {
-        "in_use": 1.0
+        "mob_controller:in_use": 1.0
       },
       "model": "mob_controller:item/beast_compass/beast_compass_animated"
     }
