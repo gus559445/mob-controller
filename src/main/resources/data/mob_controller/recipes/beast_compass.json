@@ -1,22 +1,18 @@
 {
-  "type": "minecraft:crafting_shapeless",
-  "ingredients": [
-    {
-      "item": "minecraft:echo_shard"
-    },
-    {
-      "item": "minecraft:iron_ingot"
-    },
-    {
-      "item": "minecraft:iron_ingot"
-    },
-    {
-      "item": "minecraft:iron_ingot"
-    },
-    {
-      "item": "minecraft:iron_ingot"
-    }
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " I ",
+    "IEI",
+    " I "
   ],
+  "key": {
+    "I": {
+      "item": "minecraft:iron_ingot"
+    },
+    "E": {
+      "item": "minecraft:echo_shard"
+    }
+  },
   "result": {
     "item": "mob_controller:beast_compass",
     "count": 1
