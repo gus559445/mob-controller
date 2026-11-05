@@ -56,37 +56,37 @@ public class TeleportConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
-        builder.comment("  Teleportation & Following");
+        builder.comment("  传送与跟随");
         builder.comment("===================================================");
         builder.comment("");
 
         FOLLOW_TELEPORT_HORIZONTAL_DISTANCE = builder
-                .comment("Horizontal distance (blocks) that triggers teleportation when following. Default: 14.0")
+                .comment("跟随时，水平距离超过多少格会触发传送。默认 14.0")
                 .defineInRange("follow_teleport_horizontal_distance", 14.0, 1.0, 256.0);
         builder.comment("");
 
         FOLLOW_TELEPORT_VERTICAL_DISTANCE = builder
-                .comment("Vertical distance (blocks) that triggers teleportation when following. Default: 32.0")
+                .comment("跟随时，垂直距离超过多少格会触发传送。默认 32.0")
                 .defineInRange("follow_teleport_vertical_distance", 32.0, 1.0, 256.0);
         builder.comment("");
 
         FOLLOW_MOVE_TO_DISTANCE = builder
-                .comment("Distance (blocks) at which a controlled mob starts moving toward the controller when following. Default: 8.0")
+                .comment("跟随时，离控制者超过多少格，受控生物开始朝其移动。默认 8.0")
                 .defineInRange("follow_move_to_distance", 8.0, 1.0, 64.0);
         builder.comment("");
 
         WATER_BASED_MOBS = builder
-                .comment("List of mobs that should always be treated as water-based for teleportation (overrides default type check).")
+                .comment("始终按「水生」处理传送的生物列表（覆盖默认的类型判断）。")
                 .defineList("water_based_mobs", List.of("alexsmobs:skelewag"), obj -> obj instanceof String);
         builder.comment("");
 
         LAND_BASED_MOBS = builder
-                .comment("List of mobs that should always be treated as land-based for teleportation (overrides default type check and water_based list).")
+                .comment("始终按「陆生」处理传送的生物列表（覆盖默认类型判断与 water_based 列表）。")
                 .defineList("land_based_mobs", List.of(), obj -> obj instanceof String);
         builder.comment("");
 
         AMPHIBIAN_MOBS = builder
-                .comment("List of amphibious mobs that prefer water when teleporting to a fully submerged controller")
+                .comment("两栖生物列表：当控制者在水下时，这些生物会传送到水中")
                 .defineList("amphibian_mobs", Arrays.asList("minecraft:turtle", "minecraft:frog", "minecraft:drowned"), obj -> obj instanceof String);
         SPEC = builder.build();
     }

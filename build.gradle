@@ -244,6 +244,9 @@ dependencies {
     // 天境 / Goety（祸乱鬼魅）：编译期只要那几个类
     compileOnly("maven.modrinth:aether:1.20.1-1.5.2-neoforge")
     compileOnly("maven.modrinth:goety:2.5.60.0")
+    // 突变生物（Mutant More）：mixin/mutantmore 里按 targets 指向它的 MutantBlaze，
+    // 注解处理器要能在类路径上找到这个类
+    compileOnly("maven.modrinth:new-mutant-more:1.20.1-2.0.0")
 }
 
 mixin {

@@ -109,13 +109,13 @@ public class FeatureConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
-        builder.comment("  Features & Limitations");
+        builder.comment("  功能与限制");
         builder.comment("===================================================");
         builder.comment("");
 
         BLACKLISTED_MOBS = builder
-                .comment("List of mob that cannot be controlled.",
-                        "The default mobs in the blacklist (except vanilla ones) are added due to serious code conflicts and incompatibility. Please remove them with caution.")
+                .comment("无法被控制的生物列表。",
+                        "默认黑名单里的模组生物是因为存在严重代码冲突/不兼容才加进去的，移除时请谨慎。")
                 .defineList("blacklisted_mobs", Arrays.asList(
                         "minecraft:ender_dragon",
                         "deep_aether:eots_segment",
@@ -132,9 +132,9 @@ public class FeatureConfig {
         builder.comment("");
 
         IGNORE_OWNER_TAG_MOBS = builder
-                .comment("Mobs in this list will be considered as having no owner/tame tag even if they normally do.",
-                        "Format: entity registry name, e.g., 'minecraft:wolf'.",
-                        "This overrides the default owner/tame detection.")
+                .comment("列表中的生物即使本身带主人/驯服标记，也会被当作「没有主人」处理。",
+                        "格式：实体注册名，例如 'minecraft:wolf'。",
+                        "这会覆盖默认的主人/驯服判定。")
                 .defineList("ignore_owner_tag_mobs", Arrays.asList(
                         "alexscaves:grottoceratops",
                         "alexscaves:relicheirus",
@@ -149,97 +149,97 @@ public class FeatureConfig {
         builder.comment("");
 
         STAY_WELDED_SPECIAL_AI_MOBS = builder
-                .comment("Special AI mobs that should be coordinate-welded in STAY mode")
+                .comment("在「停留」模式下需要焊死坐标的特殊 AI 飞行生物")
                 .defineList("stay_welded_special_ai_mobs", Arrays.asList(
                         "minecraft:ghast", "minecraft:vex", "minecraft:blaze", "minecraft:phantom", "minecraft:bat"
                 ), obj -> obj instanceof String);
         builder.comment("");
 
         ALWAYS_SUCCESS = builder
-                .comment("Whether to always succeed in controlling mobs")
+                .comment("是否让控制尝试必定成功")
                 .define("always_success", false);
         builder.comment("");
 
         CONTROLLED_MOBS_ATTACK_PLAYERS_ON_COMMAND = builder
-                .comment("Whether controlled mobs obey their owner's attack command against other players")
+                .comment("受控生物是否会听从主人的指令攻击其他玩家")
                 .define("controlled_mobs_attack_players_on_command", true);
         builder.comment("");
 
         CONTROLLED_MOB_HEAL_OUT_OF_COMBAT_DELAY_TICKS = builder
-                .comment("Ticks a controlled mob must stay out of combat before auto-healing starts (100 ticks = 5 seconds)")
+                .comment("受控生物脱离战斗多少 tick 后开始自动回血（100 tick = 5 秒）")
                 .defineInRange("controlled_mob_heal_out_of_combat_delay_ticks", 100, 0, Integer.MAX_VALUE);
         builder.comment("");
 
         HIGH_HEALTH_THRESHOLD = builder
-                .comment("The life value threshold for being classified as a 'high-life-value organism'")
+                .comment("被判定为「高生命值生物」的生命值门槛")
                 .defineInRange("high_health_threshold", 150, 1, Integer.MAX_VALUE);
         builder.comment("");
 
         RESPAWN_DELAY_TICKS = builder
-                .comment("The number of ticks that elapse before rebirth is triggered after the organism dies (600 ticks = 30 seconds)")
+                .comment("生物死亡后经过多少 tick 触发重生（600 tick = 30 秒）")
                 .defineInRange("respawn_delay_ticks", 600, 100, Integer.MAX_VALUE);
         builder.comment("");
 
         ENABLE_RESPAWN = builder
-                .comment("Enable or disable the respawn feature for controlled mobs. If false, controlled mobs will die normally without respawning.")
+                .comment("是否启用受控生物的重生功能。设为 false 时受控生物会正常死亡、不再重生。")
                 .define("enable_respawn", true);
         builder.comment("");
 
         ATTACK_LIMIT = builder
-                .comment("Maximum attack damage (attribute attack_damage) allowed for a mob to be controllable. Mobs with attack damage >= this value cannot be controlled.")
+                .comment("可被控制的生物允许的最大攻击伤害（属性 attack_damage）。攻击伤害大于等于该值的生物无法被控制。")
                 .defineInRange("attack_limit", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
         builder.comment("");
 
         HEALTH_LIMIT = builder
-                .comment("Maximum health (max health) allowed for a mob to be controllable. Mobs with max health >= this value cannot be controlled.")
+                .comment("可被控制的生物允许的最大生命值。最大生命值大于等于该值的生物无法被控制。")
                 .defineInRange("health_limit", Integer.MAX_VALUE, 1, Integer.MAX_VALUE);
         builder.comment("");
 
         HEALTH_PERCENT_THRESHOLD = builder
-                .comment("Health percentage threshold (0.0 ~ 100.0). If (current health / max health) * 100 <= this value, the mob becomes eligible for control (alternative to required_health). Example: 10.0 = 10%, 0.5 = 0.5%")
+                .comment("血量百分比门槛（0.0 ~ 100.0）。当（当前血量 / 最大血量）* 100 小于等于该值时，生物可被控制（与 required_health 二选一）。示例：10.0 = 10%，0.5 = 0.5%")
                 .defineInRange("health_percent_threshold", 0.01, 0.0, 100.0);
         builder.comment("");
 
         REQUIRED_HEALTH = builder
-                .comment("Absolute health threshold. If current health <= this value, the mob becomes eligible for control (alternative to health_percent_threshold).")
+                .comment("绝对血量门槛。当前血量小于等于该值时生物可被控制（与 health_percent_threshold 二选一）。")
                 .defineInRange("required_health", 10, 1, Integer.MAX_VALUE);
         builder.comment("");
 
         INFINITE_TRADES_FOR_CONTROLLED_WANDERING_TRADER = builder
-                .comment("Enable infinite trades for controlled wandering traders (reset uses to 0 after each trade).")
+                .comment("让受控的流浪商人可以无限交易（每次交易后使用次数重置为 0）。")
                 .define("infinite_trades_for_controlled_wandering_trader", true);
         builder.comment("");
 
         // 雪球击退效果配置（极小伤害+即时回血）
         SNOWBALL_KNOCKBACK_MODE = builder
-                .comment("Control snowball knockback effect (0.000001 damage + instant heal).",
-                        "Options:",
-                        "  DISABLED                     - No effect, vanilla behavior.",
-                        "  CONTROLLED_SNOW_GOLEM_ONLY   - Only snowballs thrown by controlled snow golems deal the tiny damage + heal (default).",
-                        "  SNOW_GOLEM_ONLY              - All snow golems (controlled or not) throw snowballs with the effect.",
-                        "  ALL_SNOWBALLS                - Every snowball (from any source) has the effect.")
+                .comment("控制雪球击退效果（0.000001 伤害 + 立刻回血）。",
+                        "可选值：",
+                        "  DISABLED                     - 不启用，保持原版行为。",
+                        "  CONTROLLED_SNOW_GOLEM_ONLY   - 只有受控雪傀儡扔出的雪球才有该效果（默认）。",
+                        "  SNOW_GOLEM_ONLY              - 所有雪傀儡（受控与否）扔出的雪球都有该效果。",
+                        "  ALL_SNOWBALLS                - 所有雪球（任何来源）都有该效果。")
                 .defineEnum("snowball_knockback_mode", SnowballKnockbackOption.CONTROLLED_SNOW_GOLEM_ONLY);
         builder.comment("");
 
         // 着火雪球使目标着火开关
         SNOWBALL_FIRE_HIT = builder
-                .comment("If true, a snowball that is on fire will set the hit entity on fire for 5 seconds.",
-                        "Default: true")
+                .comment("为 true 时，着火的雪球命中后会让目标燃烧 5 秒。",
+                        "默认：true")
                 .define("snowball_fire_hit", true);
         builder.comment("");
 
         PREVENT_DROPS_ON_RESPAWN = builder
-                .comment("If true, controlled mobs will drop no loot, equipment, or experience orbs when they die while respawn is enabled (enable_respawn must be true).",
-                        "This prevents item duplication issues when respawning.",
-                        "Default: true")
+                .comment("为 true 时，在开启重生（enable_respawn）的情况下，受控生物死亡不掉落任何战利品、装备和经验（可避免重生刷物品）。",
+                        "这样可以避免重生带来的刷物品问题。",
+                        "默认：true")
                 .define("prevent_drops_on_respawn", true);
         builder.comment("");
 
         CUSTOM_MAX_COUNTS = builder
-                .comment("Custom max counts for specific mobs (overrides high health limit).",
-                        "Format: 'entity_id,max_count' (e.g., 'minecraft:iron_golem,3').",
-                        "If a mob is listed here, it is not considered 'high health' and can be controlled up to max_count per player.",
-                        "Set max_count = 0 to completely disallow controlling this mob.")
+                .comment("为特定生物自定义数量上限（覆盖高血量限制）。",
+                        "格式：'实体ID,数量'（例如 'minecraft:iron_golem,3'）。",
+                        "列在这里的生物不算「高血量」，每名玩家最多可控制到「数量」个。",
+                        "把数量设为 0 表示完全禁止控制该生物。")
                 .defineList("custom_max_counts", List.of(), obj -> obj instanceof String);
 
         SPEC = builder.build();

@@ -77,13 +77,13 @@ public class RidingConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
-        builder.comment("  Riding Configuration");
+        builder.comment("  骑乘配置");
         builder.comment("===================================================");
         builder.comment("");
 
         LAND_RIDEABLE_MOBS = builder
-                .comment("List of land mobs that can be directly ridden (standard vanilla riding control). Supports custom jump height.",
-                        "Format: 'entity_id,jump_height' (jump_height is double, optional). Example: 'minecraft:cow,1.2'.")
+                .comment("可直接骑乘的陆生生物列表（沿用原版骑乘操控），支持自定义跳跃高度。",
+                        "格式：'实体ID,跳跃高度'（跳跃高度为小数，可省略）。示例：'minecraft:cow,1.2'。")
                 .defineList("land_rideable_mobs", List.of(
                         "minecraft:cow,0.42", "minecraft:sheep,0.42", "minecraft:panda,0.42",
                         "minecraft:polar_bear,0.42", "minecraft:goat,0.42", "minecraft:hoglin,0.42",
@@ -92,43 +92,43 @@ public class RidingConfig {
         builder.comment("");
 
         AQUATIC_RIDEABLE_MOBS = builder
-                .comment("List of aquatic mobs that use guardian/dolphin riding control.",
-                        "Format: 'entity_id,leave_water_dismount' (boolean), e.g., 'minecraft:dolphin,true'")
+                .comment("使用守卫者/海豚式骑乘操控的水生生物列表。",
+                        "格式：'实体ID,离水是否下马'（布尔值），例如 'minecraft:dolphin,true'")
                 .defineList("aquatic_rideable_mobs", List.of(
                         "minecraft:guardian,true", "minecraft:elder_guardian,true", "minecraft:dolphin,false"
                 ), obj -> obj instanceof String);
         builder.comment("");
 
         FLYING_RIDEABLE_MOBS = builder
-                .comment("List of flying mobs that can be ridden with custom flying control (move in look direction, space to ascend).",
-                        "Format: 'entity_id', e.g., 'minecraft:phantom'")
+                .comment("可用自定义飞行操控骑乘的飞行生物列表（朝视线方向移动，空格上升）。",
+                        "格式：'实体ID'，例如 'minecraft:phantom'")
                 .defineList("flying_rideable_mobs", List.of(), obj -> obj instanceof String);
         builder.comment("");
 
         RIDE_AMPHIBIAN_MOBS = builder
-                .comment("Amphibious rideable mobs. In water: aquatic control (pitch-based, space to ascend). On land: land control with configurable jump height.",
-                        "Format: 'entity_id,jump_height' (optional). Example: 'minecraft:frog,0.8'.")
+                .comment("两栖可骑乘生物。水中：水生操控（俯仰角控制，空格上升）；陆上：陆生操控，可配置跳跃高度。",
+                        "格式：'实体ID,跳跃高度'（可选）。示例：'minecraft:frog,0.8'。")
                 .defineList("ride_amphibian_mobs", List.of(), obj -> obj instanceof String);
         builder.comment("");
 
         RIDE_FLYING_LAND_MOBS = builder
-                .comment("Flying-land rideable mobs. Walk on ground like land mobs, press space to ascend freely.",
-                        "Format: 'entity_id', e.g., 'minecraft:phantom'.")
+                .comment("地空两栖可骑乘生物：在地面像陆生生物一样行走，按空格可自由升空。",
+                        "格式：'实体ID'，例如 'minecraft:phantom'.")
                 .defineList("ride_flying_land_mobs", List.of(), obj -> obj instanceof String);
         builder.comment("");
 
         RIDE_CUSTOM_SPEED = builder
-                .comment("Custom riding speed for flying, aquatic, amphibian (in water) and flying-land (in air) mobs.",
-                        "Format: 'entity_id,speed' where speed is double (blocks per tick).",
-                        "Example: 'minecraft:phantom,0.5'",
-                        "If not listed, default speed is 0.35.")
+                .comment("为飞行、水生、两栖（水中）以及地空两栖（空中）生物自定义骑乘速度。",
+                        "格式：'实体ID,速度'，速度为小数（格/tick）。",
+                        "示例：'minecraft:phantom,0.5'",
+                        "未列出的默认速度为 0.35。")
                 .defineList("ride_custom_speed", List.of(), obj -> obj instanceof String);
         builder.comment("");
 
         RIDE_POSITION_Y_OFFSET = builder
-                .comment("Custom rider offset (X,Y,Z) for specific mounts, relative to mount's local axes. Format: 'entity_id,offsetX,offsetY,offsetZ' (all doubles).",
-                        "Example: 'minecraft:horse,0.2,0.1,-0.1' (right +0.2, up +0.1, back -0.1).",
-                        "Backward compatible: 'minecraft:horse,0.2' means only Y offset 0.2, X=Z=0.")
+                .comment("为特定坐骑自定义骑手偏移（X,Y,Z），相对于坐骑自身坐标轴。格式：'实体ID,偏移X,偏移Y,偏移Z'（全为小数）。",
+                        "示例：'minecraft:horse,0.2,0.1,-0.1'（右 +0.2，上 +0.1，后 -0.1）。",
+                        "向后兼容：'minecraft:horse,0.2' 表示只有 Y 偏移 0.2，X 和 Z 为 0。")
                 .defineList("ride_position_y_offset", List.of(
                         "minecraft:ghast,0,1.0,2",
                         "alexsmobs:bison,0,0.6,0",
@@ -138,7 +138,7 @@ public class RidingConfig {
         builder.comment("");
 
         PREVENT_PLAYER_ATTACK_OWN_MOUNT = builder
-                .comment("Prevent players from damaging the entity they are currently riding.", "Default: true")
+                .comment("阻止玩家伤害自己正在骑乘的实体。", "默认：true")
                 .define("prevent_player_attack_own_mount", true);
         SPEC = builder.build();
     }

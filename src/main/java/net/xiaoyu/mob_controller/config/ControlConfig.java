@@ -18,27 +18,27 @@ public class ControlConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
-        builder.comment("  Custom Control Rules (EXPERIMENTAL)");
+        builder.comment("  自定义控制规则（实验性）");
         builder.comment("===================================================");
         builder.comment("");
 
         CUSTOM_CONTROL_RULES = builder
                 .comment(
-                        "!!! WARNING: EXPERIMENTAL TEST FEATURE - NOT GUARANTEED TO BE COMPATIBLE, MAY CAUSE GAME CRASHES OR DATA CORRUPTION !!!",
-                        "IMPORTANT WARNING 1: If the specified item already has an interaction with the mob (e.g., wheat feeding cows, bones taming wolves),",
-                        "this rule will PRIORITIZE the control logic over the original interaction. Right-clicking the mob with that item will",
-                        "attempt to control it instead of feeding/breeding/taming. Choose your items carefully.",
-                        "IMPORTANT WARNING 2: Items from this mod (namespace 'mob_controller', e.g., 'mob_controller:mob_controller') are FORBIDDEN.",
-                        "If you use such an item, the rule will be silently ignored and will NOT work.",
+                        "!!! 警告：这是实验性测试功能，不保证兼容，可能导致游戏崩溃或存档损坏 !!!",
+                        "重要提醒 1：如果指定的物品本来就和该生物有交互（例如小麦喂牛、骨头驯狼），",
+                        "本规则会优先执行控制逻辑，覆盖原本的交互。拿着该物品右键这只生物，",
+                        "会尝试控制它，而不是喂食/繁殖/驯服。请谨慎选择物品。",
+                        "重要提醒 2：禁止使用本模组自己的物品（命名空间 'mob_controller'，例如 'mob_controller:mob_controller'）。",
+                        "使用这类物品时，该规则会被静默忽略，完全不会生效。",
                         "",
-                        "Format: 'mob_id;item_id;chance;required_health;consume'",
-                        "- mob_id: entity registry name, e.g., 'minecraft:cow'",
-                        "- item_id: item registry name, e.g., 'minecraft:wheat' (cannot be 'mob_controller:xxx')",
-                        "- chance: float 0.0-1.0, 1.0 = always succeed",
-                        "- required_health: int, mob's current health must be <= this value to be controllable",
-                        "- consume: true/false, whether to consume one item per attempt (regardless of success)",
+                        "格式：'生物ID;物品ID;成功率;所需血量;是否消耗'",
+                        "- 生物ID：实体注册名，例如 'minecraft:cow'",
+                        "- 物品ID：物品注册名，例如 'minecraft:wheat'（不能是 'mob_controller:xxx'）",
+                        "- 成功率：0.0~1.0 的小数，1.0 表示必定成功",
+                        "- 所需血量：整数，生物的当前血量必须小于等于这个值才能被控制",
+                        "- 是否消耗：true/false，每次尝试是否消耗一个物品（无论成功与否）",
                         "",
-                        "Example: 'minecraft:cow;minecraft:wheat;1.0;10;true'"
+                        "示例：'minecraft:cow;minecraft:wheat;1.0;10;true'"
                 )
                 .defineList("custom_control_rules", List.of(), obj -> obj instanceof String);
         SPEC = builder.build();

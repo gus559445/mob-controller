@@ -29,25 +29,25 @@ public class ItemConfig {
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
-        builder.comment("  Items & Recipes");
+        builder.comment("  物品与配方");
         builder.comment("===================================================");
         builder.comment("");
 
         MAX_RIDERS_PER_MOUNT = builder
                 .comment(
-                        "Define max number of riders that can mount a specific entity type. Format: 'entity_id;max_count'.",
-                        "Example: 'minecraft:camel;2' (camel supports 2 riders).",
-                        "If an entity is not listed, it defaults to 1 rider.",
+                        "设置某种实体最多能被多少名骑手骑乘。格式：'实体ID;数量'。",
+                        "示例：'minecraft:camel;2'（骆驼支持 2 名骑手）。",
+                        "未列出的实体默认只允许 1 名骑手。",
                         "",
-                        "NOTE: This configuration only affects the 'Ride Command' item.",
-                        "It does NOT apply to vanilla riding (e.g., using saddle on horse) or direct right-click riding.",
+                        "注意：本配置只影响「骑兵之笛」物品。",
+                        "对原版骑乘（例如给马装鞍）以及直接右键骑乘都不生效。",
                         ""
                 )
                 .defineList("max_riders_per_mount", List.of("minecraft:camel;2"), obj -> obj instanceof String);
         builder.comment("");
 
         USE_GRAIN_RECIPE = builder
-                .comment("If true, the 'Grain' item will have a crafting recipe and the normal Inexhaustible Golden Stew will be uncraftable; if false, the opposite.")
+                .comment("为 true 时「五谷杂粮」有合成配方、普通「不竭金羹」不可合成；为 false 时相反。")
                 .define("use_grain_recipe", true);
         SPEC = builder.build();
     }

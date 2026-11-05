@@ -23,6 +23,9 @@ public class MobControllerMixinPlugin implements IMixinConfigPlugin {
         if (mixinClassName.equals("net.xiaoyu.mob_controller.mixin.alexscaves.MixinVesper")) {
             return ModList.get().isLoaded("alexscaves");
         }
+        if (mixinClassName.equals("net.xiaoyu.mob_controller.mixin.mutantmore.MutantBlazeHeatMixin")) {
+            return ModList.get().isLoaded("mutantmore");
+        }
         if (mixinClassName.equals("net.xiaoyu.mob_controller.mixin.cataclysm.MixinEnderGuardianNoRespawner")) {
             return ModList.get().isLoaded("cataclysm");
         }

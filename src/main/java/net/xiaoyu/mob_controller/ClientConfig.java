@@ -15,7 +15,7 @@ public class ClientConfig {
         ForgeConfigSpec.Builder BUILDER = new ForgeConfigSpec.Builder();
         BUILDER.push("Mob Controller Client Config");
         PLAY_SOUND_ON_MODE_SWITCH = BUILDER
-                .comment("Whether to play the experience orb pickup sound when directly switching a controlled mob's mode (follow/stay/wander) via right-click. Only the controller hears it.")
+                .comment("直接右键切换受控生物模式（跟随/停留/游荡）时，是否播放经验球拾取音效。只有控制者本人能听到。")
                 .define("play_sound_on_mode_switch", true);
         BUILDER.pop();
         SPEC = BUILDER.build();
