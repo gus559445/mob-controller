@@ -1,12 +1,15 @@
 package net.xiaoyu.mob_controller.util;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.player.Player;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -44,18 +47,53 @@ public final class ControlledMinionHelper {
         if (!(mob.level() instanceof ServerLevel serverLevel)) {
             return;
         }
+        // 方式一：生物自己带 Owner/Summoner 这类 NBT，且指向受控生物
         UUID ownerId = findOwnerUuid(mob);
-        if (ownerId == null) {
-            return;
+        if (ownerId != null) {
+            Entity owner = serverLevel.getEntity(ownerId);
+            // 召唤者可能在别的维度或已卸载，那就认不出来，落到方式二去试
+            if (owner instanceof Mob ownerMob && MobControlledData.isControlledEntity(ownerMob)) {
+                mob.getPersistentData().putBoolean(TAG_MINION, true);
+                return;
+            }
         }
-        Entity owner = serverLevel.getEntity(ownerId);
-        if (owner == null) {
-            // 召唤者可能在别的维度或者已卸载，这里就认不出来，直接放过
-            return;
-        }
-        if (owner instanceof Mob ownerMob && MobControlledData.isControlledEntity(ownerMob)) {
+
+        // 方式二：玩家在 controlled_minion_entities 名单里点名了这种实体，
+        // 那就在它出生时看附近有没有受控生物，有就当作它的召唤物
+        if (isListedAsMinion(mob) && hasControlledMobNearby(serverLevel, mob)) {
             mob.getPersistentData().putBoolean(TAG_MINION, true);
         }
+    }
+
+    /** 实体类型是否在 controlled_minion_entities 名单里（支持 "*"）。 */
+    private static boolean isListedAsMinion(Mob mob) {
+        List<? extends String> list = net.xiaoyu.mob_controller.Config.CONTROLLED_MINION_ENTITIES.get();
+        if (list.isEmpty()) {
+            return false;
+        }
+        ResourceLocation id = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
+        if (id == null) {
+            return false;
+        }
+        String key = id.toString();
+        for (String entry : list) {
+            if (entry == null) {
+                continue;
+            }
+            if ("*".equals(entry.trim()) || entry.trim().equalsIgnoreCase(key)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /** 16 格内有没有受控生物。 */
+    private static boolean hasControlledMobNearby(ServerLevel level, Mob minion) {
+        return !level.getEntitiesOfClass(
+                Mob.class,
+                minion.getBoundingBox().inflate(16.0D),
+                other -> other != minion && MobControlledData.isControlledEntity(other)
+        ).isEmpty();
     }
 
     /** 这只生物是不是「受控生物的召唤物」。 */

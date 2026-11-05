@@ -39,6 +39,7 @@ public class Config {
 
     // ========== 物品配置 ==========
     public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS = FeatureConfig.PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS;
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CONTROLLED_MINION_ENTITIES = FeatureConfig.CONTROLLED_MINION_ENTITIES;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MAX_RIDERS_PER_MOUNT = ItemConfig.MAX_RIDERS_PER_MOUNT;
     public static final ForgeConfigSpec.BooleanValue USE_GRAIN_RECIPE = ItemConfig.USE_GRAIN_RECIPE;
 

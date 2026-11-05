@@ -111,6 +111,12 @@ public class FeatureConfig {
      */
     public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS;
 
+    /**
+     * 受控生物的召唤物名单：列在这里的实体一出生就检查附近有没有受控生物，
+     * 有就当作它的召唤物处理。
+     */
+    public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CONTROLLED_MINION_ENTITIES;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
@@ -255,6 +261,18 @@ public class FeatureConfig {
                         "对应的是某只受控生物，就会被打上「受控仆从」标记，之后它锁定玩家时会被拦下。",
                         "注意：没有任何主人信息的野生召唤物（例如凋灵自己造的小怪）不在此列。")
                 .define("prevent_controlled_minion_attacking_players", true);
+
+        builder.comment("");
+
+        CONTROLLED_MINION_ENTITIES = builder
+                .comment("受控生物的召唤物名单（指定实体）。",
+                        "两种识别方式会一起用：",
+                        "  1) 自动：生物自带 Owner/Summoner 这类 NBT，且指向的是受控生物；",
+                        "  2) 名单：实体出生时附近 16 格内有受控生物，就当作它的召唤物。",
+                        "名单只影响第 2 种，用来兜住那些不写 owner NBT 的模组召唤物。",
+                        "格式：实体注册名，例如 'mutantmore:rodling'；写 \"*\" 表示所有实体的召唤物都接管。",
+                        "留空 = 只走自动识别。")
+                .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
 
         SPEC = builder.build();
     }
