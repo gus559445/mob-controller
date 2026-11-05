@@ -284,6 +284,10 @@ public class MobControllerEvent {
     public static void onServerTick(TickEvent.ServerTickEvent event) {
         if (event.phase == TickEvent.Phase.END) {
             MobControlledData.tickPendingRespawns(event.getServer());
+            // 寻兽罗盘：每 20 tick 给有追踪目标的玩家推一次位置
+            if (event.getServer().getTickCount() % 20 == 0) {
+                net.xiaoyu.mob_controller.network.BeastCompassTracker.tick(event.getServer());
+            }
         }
     }
 
@@ -945,20 +949,6 @@ public class MobControllerEvent {
                 MobControlledData.markCombat(mob);
             }
         }
-    }
-
-    /**
-     * 寻兽罗盘：每 20 tick 给有追踪目标的玩家推一次位置。
-     */
-    @SubscribeEvent
-    public static void onServerTick(TickEvent.ServerTickEvent event) {
-        if (event.phase != TickEvent.Phase.END) {
-            return;
-        }
-        if (event.getServer().getTickCount() % 20 != 0) {
-            return;
-        }
-        net.xiaoyu.mob_controller.network.BeastCompassTracker.tick(event.getServer());
     }
 
     /**
