@@ -38,6 +38,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
@@ -66,6 +67,7 @@ import net.xiaoyu.mob_controller.network.*;
 import net.xiaoyu.mob_controller.registry.ModItems;
 import net.xiaoyu.mob_controller.registry.ModSounds;
 import net.xiaoyu.mob_controller.util.HighHealthDatabase;
+import net.xiaoyu.mob_controller.util.ControlledMinionHelper;
 import net.xiaoyu.mob_controller.util.MobControlUtil;
 import net.xiaoyu.mob_controller.util.MobControlledData;
 import net.minecraft.nbt.CompoundTag;
@@ -931,11 +933,37 @@ public class MobControllerEvent {
     @SubscribeEvent
     public static void onLivingChangeTargetEvent(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof Mob mob && event.getNewTarget() != null) {
+            // 受控生物召唤出来的仆从不许主动锁玩家
+            if (ControlledMinionHelper.shouldBlockPlayerTarget(mob, event.getNewTarget())) {
+                event.setNewTarget(null);
+                return;
+            }
             if (MobControlledData.isControlledEntity(mob)
                     && !MobControlUtil.canKeepCombatTarget(mob, event.getNewTarget())) {
             } else if (MobControlledData.isControlledEntity(mob) && isValidCombatTarget(mob, event.getNewTarget())) {
                 MobControlledData.markCombat(mob);
             }
+        }
+    }
+
+    /**
+     * 实体进世界时判断它是不是「受控生物召唤出来的仆从」，是就打标记。
+     */
+    @SubscribeEvent
+    public static void onEntityJoinLevel(EntityJoinLevelEvent event) {
+        ControlledMinionHelper.markIfSummonedByControlledMob(event.getEntity());
+    }
+
+    /**
+     * Brain 类生物（以及部分模组实体）走的是 setAttackTarget 这一路，
+     * 和 LivingChangeTargetEvent 一起拦，免得漏掉。
+     */
+    @SubscribeEvent
+    public static void onSetAttackTarget(LivingSetAttackTargetEvent event) {
+        if (event.getEntity() instanceof Mob mob
+                && event.getTarget() != null
+                && ControlledMinionHelper.shouldBlockPlayerTarget(mob, event.getTarget())) {
+            mob.setTarget(null);
         }
     }
 

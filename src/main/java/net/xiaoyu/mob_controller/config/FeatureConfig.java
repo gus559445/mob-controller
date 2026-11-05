@@ -106,6 +106,11 @@ public class FeatureConfig {
      */
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CUSTOM_MAX_COUNTS;
 
+    /**
+     * 受控生物召唤出来的仆从，是否禁止主动把玩家当攻击目标。
+     */
+    public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
@@ -241,6 +246,15 @@ public class FeatureConfig {
                         "列在这里的生物不算「高血量」，每名玩家最多可控制到「数量」个。",
                         "把数量设为 0 表示完全禁止控制该生物。")
                 .defineList("custom_max_counts", List.of(), obj -> obj instanceof String);
+
+        builder.comment("");
+
+        PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS = builder
+                .comment("为 true 时，受控生物召唤出来的仆从不会主动把玩家当成攻击目标。",
+                        "识别方式：新生成的生物如果其召唤者/主人（Owner、Summoner 等 NBT 字段）",
+                        "对应的是某只受控生物，就会被打上「受控仆从」标记，之后它锁定玩家时会被拦下。",
+                        "注意：没有任何主人信息的野生召唤物（例如凋灵自己造的小怪）不在此列。")
+                .define("prevent_controlled_minion_attacking_players", true);
 
         SPEC = builder.build();
     }

@@ -38,6 +38,7 @@ public class Config {
     public static final ForgeConfigSpec.BooleanValue INFINITE_TRADES_FOR_CONTROLLED_WANDERING_TRADER = FeatureConfig.INFINITE_TRADES_FOR_CONTROLLED_WANDERING_TRADER;
 
     // ========== 物品配置 ==========
+    public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS = FeatureConfig.PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MAX_RIDERS_PER_MOUNT = ItemConfig.MAX_RIDERS_PER_MOUNT;
     public static final ForgeConfigSpec.BooleanValue USE_GRAIN_RECIPE = ItemConfig.USE_GRAIN_RECIPE;
 
