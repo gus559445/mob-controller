@@ -954,19 +954,6 @@ public class MobControllerEvent {
         ControlledMinionHelper.markIfSummonedByControlledMob(event.getEntity());
     }
 
-    /**
-     * Brain 类生物（以及部分模组实体）走的是 setAttackTarget 这一路，
-     * 和 LivingChangeTargetEvent 一起拦，免得漏掉。
-     */
-    @SubscribeEvent
-    public static void onSetAttackTarget(LivingSetAttackTargetEvent event) {
-        if (event.getEntity() instanceof Mob mob
-                && event.getTarget() != null
-                && ControlledMinionHelper.shouldBlockPlayerTarget(mob, event.getTarget())) {
-            mob.setTarget(null);
-        }
-    }
-
     private static boolean hasValidCombatTarget(Mob mob) {
         if (mob instanceof Hoglin || mob instanceof Zoglin || mob instanceof AbstractPiglin) {
             Brain<?> brain = mob.getBrain();
