@@ -52,7 +52,7 @@ public final class BeastCompassHud {
         double worldAngle = Math.toDegrees(Math.atan2(-dx, dz));
         int index = Math.round(Mth.wrapDegrees((float) (worldAngle - minecraft.player.getYRot())) / 45.0F) & 7;
 
-        Component line = Component.literal(ARROWS[index] + " " + target.name() + "  ")
+        Component line = Component.literal(ARROWS[index] + " " + target.name() + (target.loaded() ? "" : "（未加载）") + "  ")
                 .withStyle(ChatFormatting.AQUA)
                 .copy()
                 .append(Component.literal(distance + "m " + NAMES[index]).withStyle(ChatFormatting.WHITE));

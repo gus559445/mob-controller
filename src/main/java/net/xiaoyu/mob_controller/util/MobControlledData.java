@@ -140,6 +140,7 @@ public class MobControlledData {
         }
 
         setLegionMode(mob, false);
+        ControlledPositionCache.forget(mob.getUUID());
 
         LazyOptional<MobControlCapability> capability = mob.getCapability(MobControlCapabilityProvider.MOB_CONTROL_CAPABILITY);
         capability.ifPresent(cap -> {

@@ -22,7 +22,7 @@ public final class ClientBeastCompass {
     }
 
     /** 追踪目标快照。 */
-    public record Target(int entityId, String name, double x, double y, double z) {
+    public record Target(java.util.UUID mobId, String name, double x, double y, double z, boolean loaded) {
     }
 
     /** 收到服务端列表后弹界面。 */
@@ -36,7 +36,7 @@ public final class ClientBeastCompass {
             target = null;
             return;
         }
-        target = new Target(packet.entityId(), packet.name(), packet.x(), packet.y(), packet.z());
+        target = new Target(packet.mobId(), packet.name(), packet.x(), packet.y(), packet.z(), packet.loaded());
     }
 
     public static Target target() {

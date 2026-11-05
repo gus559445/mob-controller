@@ -301,6 +301,11 @@ public class MobControllerEvent {
                 return;
             }
             if (!MobControlledData.isControlledEntity(mob)) return;
+            // 回响指针依赖的「最后已知位置」：生物还加载着的时候每 20 tick 记一次，
+            // 区块卸载之后指针依然指得到
+            if (mob.tickCount % 20 == 0) {
+                net.xiaoyu.mob_controller.util.ControlledPositionCache.record(mob);
+            }
             if (MobControlledData.isSummoned(mob)) return;
             if (MobControlledData.isControlledEntity(mob)) {
                 mob.getCapability(MobControlCapabilityProvider.MOB_CONTROL_CAPABILITY).ifPresent(cap -> {

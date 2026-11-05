@@ -4,26 +4,28 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Mob;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.PacketDistributor;
-import net.xiaoyu.mob_controller.util.MobControlledData;
+import net.xiaoyu.mob_controller.util.ControlledPositionCache;
 
-import java.util.Objects;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 /**
  * 客户端在列表里点了某只生物：服务端记下追踪目标。
+ *
+ * <p>用生物 UUID 而不是实体 id —— 远处区块没加载的生物在服务端根本没有实体对象，
+ * 只有缓存里的 UUID 和最后已知位置。</p>
  */
-public record BeastCompassSelectPacket(int entityId) {
+public record BeastCompassSelectPacket(UUID mobId, String name) {
 
     public BeastCompassSelectPacket(FriendlyByteBuf buf) {
-        this(buf.readVarInt());
+        this(buf.readUUID(), buf.readUtf(64));
     }
 
     public void toBytes(FriendlyByteBuf buf) {
-        buf.writeVarInt(this.entityId());
+        buf.writeUUID(this.mobId());
+        buf.writeUtf(this.name(), 64);
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -33,7 +35,8 @@ public record BeastCompassSelectPacket(int entityId) {
                 return;
             }
 
-            if (this.entityId() < 0) {
+            // 取消追踪
+            if (this.mobId() == null || this.mobId().equals(BeastCompassTracker.NONE)) {
                 BeastCompassTracker.clear(player.getUUID());
                 player.displayClientMessage(
                         Component.translatable("mob_controller.beast_compass.cleared").withStyle(ChatFormatting.GRAY),
@@ -41,23 +44,21 @@ public record BeastCompassSelectPacket(int entityId) {
                 return;
             }
 
-            Entity entity = player.serverLevel().getEntity(this.entityId());
-            if (!(entity instanceof Mob mob)
-                    || !MobControlledData.isControlledEntity(mob)
-                    || !Objects.equals(MobControlledData.getControllerUUID(mob), player.getUUID())) {
+            ControlledPositionCache.Entry cached = ControlledPositionCache.get(this.mobId());
+            if (cached == null) {
                 player.displayClientMessage(
                         Component.translatable("mob_controller.beast_compass.not_yours").withStyle(ChatFormatting.RED),
                         true);
                 return;
             }
 
-            BeastCompassTracker.set(player.getUUID(), this.entityId());
+            BeastCompassTracker.set(player.getUUID(), this.mobId());
             NetWorkManager.INSTANCE.send(
                     PacketDistributor.PLAYER.with(() -> player),
                     BeastCompassTracker.trackOf(player)
             );
             player.displayClientMessage(
-                    Component.translatable("mob_controller.beast_compass.selected", mob.getDisplayName())
+                    Component.translatable("mob_controller.beast_compass.selected", cached.name())
                             .withStyle(ChatFormatting.GREEN),
                     true);
         });

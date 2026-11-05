@@ -70,8 +70,11 @@ public class BeastCompassScreen extends Screen {
             BeastCompassListPacket.Entry entry = entries.get(i);
             Component label = Component.literal(entry.name())
                     .append(Component.literal("  " + entry.typeId()).withStyle(ChatFormatting.GRAY))
-                    .append(Component.literal("  " + entry.distance() + "m").withStyle(ChatFormatting.DARK_GREEN));
-            addRenderableWidget(Button.builder(label, b -> select(entry.id()))
+                    .append(Component.literal("  " + entry.distance() + "m").withStyle(ChatFormatting.DARK_GREEN))
+                    .append(entry.loaded()
+                            ? Component.empty()
+                            : Component.literal("  未加载").withStyle(ChatFormatting.DARK_RED));
+            addRenderableWidget(Button.builder(label, b -> select(entry.mobId(), entry.name()))
                     .bounds(x, y, width, rowHeight).build());
             y += rowHeight + 2;
         }
@@ -92,13 +95,13 @@ public class BeastCompassScreen extends Screen {
 
         int y3 = y2 + 24;
         addRenderableWidget(Button.builder(Component.translatable("mob_controller.beast_compass.stop"),
-                b -> select(-1)).bounds(x, y3, half, 20).build());
+                b -> select(net.xiaoyu.mob_controller.network.BeastCompassTracker.NONE, "")).bounds(x, y3, half, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
                 .bounds(x + half + 8, y3, half, 20).build());
     }
 
-    private void select(int entityId) {
-        NetWorkManager.INSTANCE.sendToServer(new BeastCompassSelectPacket(entityId));
+    private void select(java.util.UUID mobId, String name) {
+        NetWorkManager.INSTANCE.sendToServer(new BeastCompassSelectPacket(mobId, name));
         onClose();
     }
 
