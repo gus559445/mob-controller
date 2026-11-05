@@ -115,8 +115,8 @@ public record BeastCompassRequestPacket(boolean deep) {
         int limit = net.xiaoyu.mob_controller.Config.BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT.get();
         Set<Long> loaded = new HashSet<>();
         for (ControlledPositionCache.Entry cached : ControlledPositionCache.forOwner(player.getUUID(), level.dimension())) {
-            int chunkX = net.minecraft.core.BlockPos.containing(cached.x(), cached.z()).getX() >> 4;
-            int chunkZ = net.minecraft.core.BlockPos.containing(cached.x(), cached.z()).getZ() >> 4;
+            int chunkX = net.minecraft.util.Mth.floor(cached.x()) >> 4;
+            int chunkZ = net.minecraft.util.Mth.floor(cached.z()) >> 4;
             if (!loaded.add(((long) chunkX << 32) | (chunkZ & 0xFFFFFFFFL))) {
                 continue;
             }
