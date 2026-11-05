@@ -1,6 +1,0 @@
-{
-  "parent": "item/generated",
-  "textures": {
-    "layer0": "mob_controller:item/beast_compass/beast_compass_19"
-  }
-}
