@@ -25,7 +25,7 @@ public class BeastCompassItem extends Item {
     @Override
     public InteractionResultHolder<ItemStack> use(Level level, Player player, InteractionHand hand) {
         if (level.isClientSide) {
-            NetWorkManager.INSTANCE.sendToServer(new BeastCompassRequestPacket());
+            NetWorkManager.INSTANCE.sendToServer(new BeastCompassRequestPacket(false));
         }
         return InteractionResultHolder.sidedSuccess(player.getItemInHand(hand), level.isClientSide);
     }

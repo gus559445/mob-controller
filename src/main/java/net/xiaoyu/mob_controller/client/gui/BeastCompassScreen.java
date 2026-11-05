@@ -98,6 +98,17 @@ public class BeastCompassScreen extends Screen {
                 b -> select(net.xiaoyu.mob_controller.network.BeastCompassTracker.NONE, "")).bounds(x, y3, half, 20).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
                 .bounds(x + half + 8, y3, half, 20).build());
+
+        // 深度搜索：让服务端把远处/未加载区块里的受控生物也拉出来
+        int y4 = y3 + 24;
+        addRenderableWidget(Button.builder(Component.translatable("mob_controller.beast_compass.deep"),
+                b -> deepSearch()).bounds(x, y4, width, 20).build());
+    }
+
+    /** 深度搜索：服务端会强制加载远处区块，可能要等一下才有结果。 */
+    private void deepSearch() {
+        NetWorkManager.INSTANCE.sendToServer(new net.xiaoyu.mob_controller.network.BeastCompassRequestPacket(true));
+        onClose();
     }
 
     private void select(java.util.UUID mobId, String name) {

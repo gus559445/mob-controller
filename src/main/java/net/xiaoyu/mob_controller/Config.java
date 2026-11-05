@@ -41,6 +41,7 @@ public class Config {
     public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS = FeatureConfig.PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CONTROLLED_MINION_ENTITIES = FeatureConfig.CONTROLLED_MINION_ENTITIES;
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING = FeatureConfig.CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
+    public static final ForgeConfigSpec.IntValue BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT = FeatureConfig.BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MAX_RIDERS_PER_MOUNT = ItemConfig.MAX_RIDERS_PER_MOUNT;
     public static final ForgeConfigSpec.BooleanValue USE_GRAIN_RECIPE = ItemConfig.USE_GRAIN_RECIPE;
 

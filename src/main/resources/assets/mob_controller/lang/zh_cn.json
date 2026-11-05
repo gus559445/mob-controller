@@ -42,6 +42,7 @@
   "mob_controller.beast_compass.stop": "取消追踪",
   "mob_controller.beast_compass.selected": "开始追踪：%s",
   "mob_controller.beast_compass.cleared": "已取消追踪",
+  "mob_controller.beast_compass.deep": "深度搜索（加载远处区块，可能卡一下）",
   "mob_controller.beast_compass.not_yours": "这不是你驯服的生物",
   "key.mob_controller.ai_config": "AI 聊天设置",
   "mob_controller.ai_config.title": "AI 聊天设置",

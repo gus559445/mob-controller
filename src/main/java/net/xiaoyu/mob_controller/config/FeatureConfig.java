@@ -122,6 +122,11 @@ public class FeatureConfig {
      */
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
 
+    /**
+     * 回响指针「深度搜索」时一次最多强制加载多少个区块。
+     */
+    public static final ForgeConfigSpec.IntValue BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
@@ -285,6 +290,14 @@ public class FeatureConfig {
                 .comment("为 true 时，受控生物以及它的召唤物引发的爆炸不会破坏方块。",
                         "只清掉方块破坏，伤害和击退照常 —— 苦力怕类召唤物自爆还是会炸伤生物，只是不再炸出坑。")
                 .define("controlled_minion_explosion_no_griefing", true);
+
+        builder.comment("");
+
+        BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT = builder
+                .comment("回响指针的「深度搜索」一次最多强制加载多少个区块。",
+                        "深度搜索会把缓存里那些生物所在的区块拉起来，好让远处/被卸载的实体重新出现；",
+                        "一次拉太多会让服务器明显卡顿，默认 32 是个折中值。")
+                .defineInRange("beast_compass_deep_search_chunk_limit", 32, 1, 512);
 
         SPEC = builder.build();
     }

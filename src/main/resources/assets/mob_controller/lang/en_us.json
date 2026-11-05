@@ -42,6 +42,7 @@
   "mob_controller.beast_compass.stop": "Stop tracking",
   "mob_controller.beast_compass.selected": "Now tracking: %s",
   "mob_controller.beast_compass.cleared": "Tracking cleared",
+  "mob_controller.beast_compass.deep": "Deep search (loads far chunks, may lag)",
   "mob_controller.beast_compass.not_yours": "That mob is not yours",
   "key.mob_controller.ai_config": "AI Chat Settings",
   "mob_controller.ai_config.title": "AI Chat Settings",

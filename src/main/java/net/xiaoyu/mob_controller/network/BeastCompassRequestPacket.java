@@ -26,13 +26,14 @@ import java.util.function.Supplier;
  * <p>先收已加载的实体（实时坐标），再用 {@link ControlledPositionCache} 里
  * 「最后已知位置」补上那些区块已经卸载的，这样走多远都能在列表里看到。</p>
  */
-public record BeastCompassRequestPacket() {
+public record BeastCompassRequestPacket(boolean deep) {
 
     public BeastCompassRequestPacket(FriendlyByteBuf buf) {
-        this();
+        this(buf.readBoolean());
     }
 
     public void toBytes(FriendlyByteBuf buf) {
+        buf.writeBoolean(this.deep());
     }
 
     public void handle(Supplier<NetworkEvent.Context> ctx) {
@@ -42,6 +43,12 @@ public record BeastCompassRequestPacket() {
                 return;
             }
             ServerLevel level = player.serverLevel();
+
+            // 深度搜索：先把缓存里那些生物所在的区块主动加载出来，
+            // 这样远处/被卸载的实体就重新出现在 level.getEntities() 里了
+            if (this.deep()) {
+                forceLoadCachedChunks(player, level);
+            }
 
             List<BeastCompassListPacket.Entry> entries = new ArrayList<>();
             Set<UUID> seen = new HashSet<>();
@@ -96,5 +103,31 @@ public record BeastCompassRequestPacket() {
             );
         });
         ctx.get().setPacketHandled(true);
+    }
+
+    /**
+     * 把缓存里每只生物所在的区块强制加载一遍。
+     *
+     * <p>加载上限由 {@code beast_compass_deep_search_chunk_limit} 控制 —— 一次性拉太多区块
+     * 会把服务器卡住，所以宁可少搜几只也别把主线程堵死。</p>
+     */
+    private void forceLoadCachedChunks(ServerPlayer player, ServerLevel level) {
+        int limit = net.xiaoyu.mob_controller.Config.BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT.get();
+        Set<Long> loaded = new HashSet<>();
+        for (ControlledPositionCache.Entry cached : ControlledPositionCache.forOwner(player.getUUID(), level.dimension())) {
+            int chunkX = net.minecraft.core.BlockPos.containing(cached.x(), cached.z()).getX() >> 4;
+            int chunkZ = net.minecraft.core.BlockPos.containing(cached.x(), cached.z()).getZ() >> 4;
+            if (!loaded.add(((long) chunkX << 32) | (chunkZ & 0xFFFFFFFFL))) {
+                continue;
+            }
+            if (loaded.size() > limit) {
+                break;
+            }
+            try {
+                level.getChunk(chunkX, chunkZ);
+            } catch (Exception ignored) {
+                // 区块坏了也不能让整个请求挂掉
+            }
+        }
     }
 }
