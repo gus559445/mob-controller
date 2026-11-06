@@ -22,6 +22,9 @@ import java.util.List;
 @OnlyIn(Dist.CLIENT)
 public class BeastCompassScreen extends Screen {
 
+    private static final int ROW_H = 20;
+    private static final int ROW_GAP = 24;
+
     private final List<BeastCompassListPacket.Entry> entries;
     private int page;
 
@@ -49,8 +52,9 @@ public class BeastCompassScreen extends Screen {
     private void ensureLayout() {
         listWidth = Mth.clamp((int) (this.width * 0.85F), 180, 420);
         rowHeight = Mth.clamp((int) (this.height * 0.045F), 14, 28);
-        int reserved = 40 /*标题*/ + 66 /*底部两排按钮*/ + 10;
-        int available = Math.max(rowHeight * 3, this.height - reserved);
+        // 底部现在有三排按钮（翻页 / 取消-完成 / 深度搜索），从屏幕底边往上数
+        int pageY = this.height - 6 - ROW_GAP * 2 - ROW_H;
+        int available = Math.max(rowHeight * 3, pageY - 34 - 6);
         pageSize = Math.max(3, available / (rowHeight + 2));
         if (page * pageSize >= entries.size() && page > 0) {
             page = Math.max(0, (entries.size() - 1) / pageSize);
@@ -79,30 +83,32 @@ public class BeastCompassScreen extends Screen {
             y += rowHeight + 2;
         }
 
-        int y2 = Math.max(y + 6, this.height - 60);
         int half = (width - 8) / 2;
+
+        // 从屏幕底边往上排，保证最下面那排（深度搜索）不会跑出屏幕
+        int deepY = this.height - 6 - ROW_H;
+        int y3 = deepY - ROW_GAP;
+        int y2 = y3 - ROW_GAP;
 
         if (page > 0) {
             addRenderableWidget(Button.builder(Component.translatable("mob_controller.beast_compass.prev"),
-                    b -> { page--; rebuild(); }).bounds(x, y2, half, 20).build());
+                    b -> { page--; rebuild(); }).bounds(x, y2, half, ROW_H).build());
         }
         int rightX = page > 0 ? x + half + 8 : x;
         int rightW = page > 0 ? half : width;
         if ((page + 1) * pageSize < entries.size()) {
             addRenderableWidget(Button.builder(Component.translatable("mob_controller.beast_compass.next"),
-                    b -> { page++; rebuild(); }).bounds(rightX, y2, rightW, 20).build());
+                    b -> { page++; rebuild(); }).bounds(rightX, y2, rightW, ROW_H).build());
         }
 
-        int y3 = y2 + 24;
         addRenderableWidget(Button.builder(Component.translatable("mob_controller.beast_compass.stop"),
-                b -> select(net.xiaoyu.mob_controller.network.BeastCompassTracker.NONE, "")).bounds(x, y3, half, 20).build());
+                b -> select(net.xiaoyu.mob_controller.network.BeastCompassTracker.NONE, "")).bounds(x, y3, half, ROW_H).build());
         addRenderableWidget(Button.builder(Component.translatable("gui.done"), b -> onClose())
-                .bounds(x + half + 8, y3, half, 20).build());
+                .bounds(x + half + 8, y3, half, ROW_H).build());
 
         // 深度搜索：让服务端把远处/未加载区块里的受控生物也拉出来
-        int y4 = y3 + 24;
         addRenderableWidget(Button.builder(Component.translatable("mob_controller.beast_compass.deep"),
-                b -> deepSearch()).bounds(x, y4, width, 20).build());
+                b -> deepSearch()).bounds(x, deepY, width, ROW_H).build());
     }
 
     /** 深度搜索：服务端会强制加载远处区块，可能要等一下才有结果。 */
