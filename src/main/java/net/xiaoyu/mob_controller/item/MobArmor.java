@@ -14,7 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
-import net.xiaoyu.mob_controller.client.GuiHandler;
+import net.xiaoyu.mob_controller.inv.GuiHandler;
 import net.xiaoyu.mob_controller.util.MobControlledData;
 
 import java.util.List;
