@@ -210,7 +210,8 @@ public final class DimensionFollow {
         try {
             Entity placed = mob.changeDimension(toLevel, new ITeleporter() {
                 @Override
-                public Entity placeEntity(Level level, Entity entity, float yaw, Function<Boolean, Entity> repositionEntity) {
+                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld,
+                                          float yaw, Function<Boolean, Entity> repositionEntity) {
                     Entity result = repositionEntity.apply(true);
                     if (result != null) {
                         result.moveTo(x, y, z, yaw, result.getXRot());
