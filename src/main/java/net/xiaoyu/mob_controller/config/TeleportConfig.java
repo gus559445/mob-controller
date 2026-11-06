@@ -74,6 +74,13 @@ public class TeleportConfig {
      */
     public static final ForgeConfigSpec.IntValue DIMENSION_FOLLOW_MAX_MOBS;
 
+    /**
+     * 出生点保护半径（格）。
+     * 距离该维度出生点在此范围内的受控生物不会被跨维度带走（通常用于把基地里的伙伴留下）。
+     * 0 表示不启用保护。默认 128.0（8 个区块）。
+     */
+    public static final ForgeConfigSpec.DoubleValue DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
@@ -130,6 +137,12 @@ public class TeleportConfig {
         DIMENSION_FOLLOW_MAX_MOBS = builder
                 .comment("单次跨维度跟随最多携带的生物数量。默认 32")
                 .defineInRange("dimension_follow_max_mobs", 32, 1, 1024);
+        builder.comment("");
+
+        DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS = builder
+                .comment("出生点保护半径（格）：距该维度出生点在此范围内的受控生物不会被跨维度带走。"
+                        + "0 = 不启用。默认 128.0（8 个区块）")
+                .defineInRange("dimension_follow_exclude_spawn_radius", 128.0, 0.0, 100000.0);
         SPEC = builder.build();
     }
 

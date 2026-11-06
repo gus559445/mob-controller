@@ -24,6 +24,7 @@ public class Config {
     public static final ForgeConfigSpec.DoubleValue DIMENSION_FOLLOW_RANGE = TeleportConfig.DIMENSION_FOLLOW_RANGE;
     public static final ForgeConfigSpec.BooleanValue DIMENSION_FOLLOW_LOAD_UNLOADED_CHUNKS = TeleportConfig.DIMENSION_FOLLOW_LOAD_UNLOADED_CHUNKS;
     public static final ForgeConfigSpec.IntValue DIMENSION_FOLLOW_MAX_MOBS = TeleportConfig.DIMENSION_FOLLOW_MAX_MOBS;
+    public static final ForgeConfigSpec.DoubleValue DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS = TeleportConfig.DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS;
 
     // ========== 功能配置 ==========
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLISTED_MOBS = FeatureConfig.BLACKLISTED_MOBS;

@@ -2,6 +2,7 @@ package net.xiaoyu.mob_controller.util;
 
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -14,6 +15,7 @@ import net.xiaoyu.mob_controller.MobController;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -115,6 +117,10 @@ public final class DimensionFollow {
         List<Mob> result = new ArrayList<>();
         Set<UUID> seen = new HashSet<>();
 
+        // 出生点附近的受控生物留在原地（通常是基地里的伙伴）
+        double excludeRadius = Config.DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS.get();
+        BlockPos spawnPos = excludeRadius > 0 ? fromLevel.getSharedSpawnPos() : null;
+
         // 1) 原维度中已加载的实体
         for (Entity entity : fromLevel.getEntities().getAll()) {
             if (!(entity instanceof Mob mob)) {
@@ -124,6 +130,9 @@ public final class DimensionFollow {
                 continue;
             }
             if (limited && mob.distanceToSqr(pending.x(), pending.y(), pending.z()) > range * range) {
+                continue;
+            }
+            if (isNearSpawn(mob.getX(), mob.getY(), mob.getZ(), spawnPos, excludeRadius)) {
                 continue;
             }
             if (seen.add(mob.getUUID())) {
@@ -146,6 +155,9 @@ public final class DimensionFollow {
                     pending.x(), pending.y(), pending.z()) > range * range) {
                 continue;
             }
+            if (isNearSpawn(cached.x(), cached.y(), cached.z(), spawnPos, excludeRadius)) {
+                continue;
+            }
             missing.add(cached.mobId());
             missingPos.add(new double[]{cached.x(), cached.y(), cached.z()});
         }
@@ -155,6 +167,9 @@ public final class DimensionFollow {
                 continue;
             }
             if (limited && distSqr(pos.x(), pos.y(), pos.z(), pending.x(), pending.y(), pending.z()) > range * range) {
+                continue;
+            }
+            if (isNearSpawn(pos.x(), pos.y(), pos.z(), spawnPos, excludeRadius)) {
                 continue;
             }
             if (missing.add(pos.mobUUID())) {
@@ -239,6 +254,23 @@ public final class DimensionFollow {
         }
         return MobControlledData.isControlledEntity(mob)
                 && Objects.equals(MobControlledData.getControllerUUID(mob), ownerUUID);
+    }
+
+    /**
+     * 判断坐标是否落在出生点保护半径内。
+     *
+     * @param x      生物 X
+     * @param y      生物 Y
+     * @param z      生物 Z
+     * @param spawnPos 该维度出生点；{@code null} 表示未启用保护
+     * @param radius 保护半径（格）
+     * @return 是否位于出生点附近
+     */
+    private static boolean isNearSpawn(double x, double y, double z, @Nullable BlockPos spawnPos, double radius) {
+        if (spawnPos == null || radius <= 0) {
+            return false;
+        }
+        return distSqr(x, y, z, spawnPos.getX() + 0.5, spawnPos.getY(), spawnPos.getZ() + 0.5) <= radius * radius;
     }
 
     private static double distSqr(double x1, double y1, double z1, double x2, double y2, double z2) {
