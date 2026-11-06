@@ -42,6 +42,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityLeaveLevelEvent;
 import net.minecraftforge.event.entity.EntityMobGriefingEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.living.*;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.level.ExplosionEvent;
@@ -68,6 +69,7 @@ import net.xiaoyu.mob_controller.network.*;
 import net.xiaoyu.mob_controller.registry.ModItems;
 import net.xiaoyu.mob_controller.registry.ModSounds;
 import net.xiaoyu.mob_controller.util.HighHealthDatabase;
+import net.xiaoyu.mob_controller.util.DimensionFollow;
 import net.xiaoyu.mob_controller.util.ControlledMinionHelper;
 import net.xiaoyu.mob_controller.util.MobControlUtil;
 import net.xiaoyu.mob_controller.util.MobControlledData;
@@ -221,6 +223,28 @@ public class MobControllerEvent {
     @SubscribeEvent
     public static void onServerStopped(ServerStoppedEvent event) {
         HighHealthDatabase.close();
+        // 清理跨维度跟随的运行时状态
+        DimensionFollow.clear();
+    }
+
+    /**
+     * 玩家即将跨维度前，记录其所在维度与坐标，供受控生物跨维度跟随使用。
+     */
+    @SubscribeEvent
+    public static void onPlayerTravelToDimension(EntityTravelToDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            DimensionFollow.recordBeforeTravel(serverPlayer);
+        }
+    }
+
+    /**
+     * 玩家完成维度切换后，把留在原维度的受控生物一并带过来。
+     */
+    @SubscribeEvent
+    public static void onPlayerChangedDimension(PlayerEvent.PlayerChangedDimensionEvent event) {
+        if (event.getEntity() instanceof ServerPlayer serverPlayer) {
+            DimensionFollow.onChangedDimension(serverPlayer, event.getTo());
+        }
     }
 
     /**

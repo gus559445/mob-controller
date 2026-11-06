@@ -118,6 +118,12 @@ public class FeatureConfig {
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CONTROLLED_MINION_ENTITIES;
 
     /**
+     * 是否阻止已受控的灾变 Boss 执行「回家」传送。
+     * 灾变 Boss 离开记录的家乡维度时会自行传送回竞技场，表现为「被带到别的维度后消失」。
+     */
+    public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_BOSS_RETURN_HOME;
+
+    /**
      * 受控生物（及其召唤物）引发的爆炸，是否不破坏方块。
      */
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
@@ -284,6 +290,14 @@ public class FeatureConfig {
                         "留空 = 只走自动识别。")
                 .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
 
+        builder.comment("");
+
+        PREVENT_CONTROLLED_BOSS_RETURN_HOME = builder
+                .comment("阻止已受控的灾变 Boss 执行「回家」传送。",
+                        "灾变 Boss 一旦离开自身记录的家乡维度会自行传送回竞技场中心，",
+                        "表现为「被放到别的维度后直接消失」。开启后受控 Boss 可正常跟随控制者跨维度。",
+                        "默认 true")
+                .define("prevent_controlled_boss_return_home", true);
         builder.comment("");
 
         CONTROLLED_MINION_EXPLOSION_NO_GRIEFING = builder

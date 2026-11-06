@@ -53,6 +53,27 @@ public class TeleportConfig {
      */
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> AMPHIBIAN_MOBS;
 
+    /**
+     * 是否启用「跨维度自动跟随」。
+     * 开启后，控制者切换维度时，其名下受控生物会被一并带到新维度。
+     */
+    public static final ForgeConfigSpec.BooleanValue ENABLE_DIMENSION_FOLLOW;
+
+    /**
+     * 跨维度跟随的搜索半径（格）。0 或负数表示不限距离。
+     */
+    public static final ForgeConfigSpec.DoubleValue DIMENSION_FOLLOW_RANGE;
+
+    /**
+     * 是否允许为带走受控生物而强制加载未加载区块。
+     */
+    public static final ForgeConfigSpec.BooleanValue DIMENSION_FOLLOW_LOAD_UNLOADED_CHUNKS;
+
+    /**
+     * 单次跨维度跟随最多携带的生物数量。
+     */
+    public static final ForgeConfigSpec.IntValue DIMENSION_FOLLOW_MAX_MOBS;
+
     static {
         ForgeConfigSpec.Builder builder = new ForgeConfigSpec.Builder();
         builder.comment("===================================================");
@@ -88,6 +109,27 @@ public class TeleportConfig {
         AMPHIBIAN_MOBS = builder
                 .comment("两栖生物列表：当控制者在水下时，这些生物会传送到水中")
                 .defineList("amphibian_mobs", Arrays.asList("minecraft:turtle", "minecraft:frog", "minecraft:drowned"), obj -> obj instanceof String);
+        builder.comment("");
+
+        ENABLE_DIMENSION_FOLLOW = builder
+                .comment("启用受控生物跨维度自动跟随：控制者切换维度时，其名下受控生物一并带走。默认 true")
+                .define("enable_dimension_follow", true);
+        builder.comment("");
+
+        DIMENSION_FOLLOW_RANGE = builder
+                .comment("跨维度跟随的搜索半径（格）。设为 0 或负数表示不限距离。默认 256.0")
+                .defineInRange("dimension_follow_range", 256.0, -1.0, 30000000.0);
+        builder.comment("");
+
+        DIMENSION_FOLLOW_LOAD_UNLOADED_CHUNKS = builder
+                .comment("允许为带走受控生物而强制加载未加载区块；开启可找回被困在未加载区块的伙伴，"
+                        + "但跨维度瞬间可能出现短暂卡顿。默认 true")
+                .define("dimension_follow_load_unloaded_chunks", true);
+        builder.comment("");
+
+        DIMENSION_FOLLOW_MAX_MOBS = builder
+                .comment("单次跨维度跟随最多携带的生物数量。默认 32")
+                .defineInRange("dimension_follow_max_mobs", 32, 1, 1024);
         SPEC = builder.build();
     }
 

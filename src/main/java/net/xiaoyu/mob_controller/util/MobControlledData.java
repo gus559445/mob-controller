@@ -45,6 +45,7 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.xiaoyu.mob_controller.Config;
+import net.xiaoyu.mob_controller.MobController;
 import net.xiaoyu.mob_controller.capability.MobControlCapability;
 import net.xiaoyu.mob_controller.capability.MobControlCapabilityProvider;
 import net.xiaoyu.mob_controller.item.LegionBannerItem;
@@ -79,6 +80,9 @@ public class MobControlledData {
     private static final String PENDING_RESPAWN_TAG = "pending_respawns";
     private static final String PENDING_RESPAWN_DATA_DIR = "mob_controller";
     private static final String PENDING_RESPAWN_FILE = "pending_respawns.dat";
+
+    private static final org.apache.logging.log4j.Logger LOGGER =
+            org.apache.logging.log4j.LogManager.getLogger(MobController.MOD_ID);
     @Nullable
     private static Path loadedPendingRespawnFile;
 
@@ -245,7 +249,10 @@ public class MobControlledData {
         CompoundTag fullNbt = mob.saveWithoutId(new CompoundTag());
         boolean success = HighHealthDatabase.insertControlledMob(controllerUUID, mob, fullNbt);
         if (!success) {
-            throw new IllegalStateException("Failed to insert controlled mob record");
+            // 数据库不可用（例如缺少 SQLite JDBC 驱动）时降级：
+            // 高生命值记录仅用于限制同类重复控制，不应阻断控制流程本身。
+            LOGGER.warn("Failed to insert controlled mob record for {}; continuing without database record",
+                    mob.getUUID());
         }
     }
 

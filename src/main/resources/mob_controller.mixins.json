@@ -95,12 +95,11 @@
     "cataclysm.MixinNetheriteMonstrosityNoRespawner",
     "cataclysm.MixinScyllaNoRespawner",
     "cataclysm.MixinMaledictusNoRespawner",
+    "cataclysm.MixinBossReturnToHome",
     "mutantmore.MutantBlazeHeatMixin"
   ],
-  "client": [
-  ],
-  "server": [
-  ],
+  "client": [],
+  "server": [],
   "injectors": {
     "defaultRequire": 1
   }

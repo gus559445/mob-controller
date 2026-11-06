@@ -23,12 +23,14 @@ public class HighHealthDatabase {
     private static final Logger LOGGER = LogManager.getLogger(MobController.MOD_ID);
     private static Connection connection = null;
     private static MinecraftServer currentServer = null;
+    /** 数据库是否已确认不可用（如缺少 SQLite JDBC 驱动）。确认后不再重复初始化。 */
+    private static volatile boolean unavailable = false;
 
     // 缓存：playerUUID -> (mobType -> Set<mobUUID>)  只保存存活或重生中的生物UUID
     private static final Map<UUID, Map<String, Set<UUID>>> CACHE = new ConcurrentHashMap<>();
 
     public static void init(MinecraftServer server) {
-        if (connection != null) return;
+        if (connection != null || unavailable) return;
         currentServer = server;
         File dataDir = server.getWorldPath(LevelResource.ROOT)
                 .resolve("data").resolve("mob_controller").toFile();
@@ -56,13 +58,16 @@ public class HighHealthDatabase {
             }
             loadAllToCache();
         } catch (Exception e) {
-            LOGGER.error("Failed to initialize database", e);
+            // SQLite 驱动缺失（常见于不带 JNI 库的环境）时永久降级，
+            // 数据库相关功能全部转为安全空实现，不再重复初始化。
+            unavailable = true;
             connection = null;
+            LOGGER.warn("Controlled-mob database unavailable, related features disabled: {}", e.toString());
         }
     }
 
     private static void ensureConnection() {
-        if (connection != null) return;
+        if (connection != null || unavailable) return;
         if (currentServer != null) init(currentServer);
         else {
             MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
@@ -292,5 +297,52 @@ public class HighHealthDatabase {
         }
         CACHE.clear();
         currentServer = null;
+        // 服务器停止后重置，下次启动允许再尝试一次
+        unavailable = false;
+    }
+
+    /**
+     * 持久化的受控生物位置记录。
+     *
+     * @param mobUUID   生物 UUID
+     * @param dimension 维度 ID（如 "minecraft:overworld"）
+     * @param x         方块 X
+     * @param y         方块 Y
+     * @param z         方块 Z
+     */
+    public record PersistedMobPos(UUID mobUUID, String dimension, int x, int y, int z) {
+    }
+
+    /**
+     * 查询某控制者名下全部存活受控生物的持久化位置记录。
+     *
+     * <p>数据库只保存「高生命值」受控生物的完整数据，因此返回的是该子集
+     * 的最后已知位置，用于在生物处于未加载区块时定位它们。</p>
+     *
+     * @param playerUUID 控制者 UUID
+     * @return 位置记录列表；数据库不可用时返回空列表
+     */
+    public static List<PersistedMobPos> listPositions(UUID playerUUID) {
+        ensureConnection();
+        if (connection == null) return Collections.emptyList();
+        List<PersistedMobPos> result = new ArrayList<>();
+        try (PreparedStatement pstmt = connection.prepareStatement(
+                "SELECT mob_uuid, dimension, block_x, block_y, block_z FROM controlled_mobs" +
+                        " WHERE player_uuid = ? AND is_alive = 1 AND is_respawning = 0")) {
+            pstmt.setString(1, playerUUID.toString());
+            try (ResultSet rs = pstmt.executeQuery()) {
+                while (rs.next()) {
+                    result.add(new PersistedMobPos(
+                            UUID.fromString(rs.getString(1)),
+                            rs.getString(2),
+                            rs.getInt(3),
+                            rs.getInt(4),
+                            rs.getInt(5)));
+                }
+            }
+        } catch (SQLException e) {
+            LOGGER.error("Failed to list controlled mob positions", e);
+        }
+        return result;
     }
 }

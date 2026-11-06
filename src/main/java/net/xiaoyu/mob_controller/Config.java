@@ -20,6 +20,10 @@ public class Config {
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> WATER_BASED_MOBS = TeleportConfig.WATER_BASED_MOBS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> LAND_BASED_MOBS = TeleportConfig.LAND_BASED_MOBS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> AMPHIBIAN_MOBS = TeleportConfig.AMPHIBIAN_MOBS;
+    public static final ForgeConfigSpec.BooleanValue ENABLE_DIMENSION_FOLLOW = TeleportConfig.ENABLE_DIMENSION_FOLLOW;
+    public static final ForgeConfigSpec.DoubleValue DIMENSION_FOLLOW_RANGE = TeleportConfig.DIMENSION_FOLLOW_RANGE;
+    public static final ForgeConfigSpec.BooleanValue DIMENSION_FOLLOW_LOAD_UNLOADED_CHUNKS = TeleportConfig.DIMENSION_FOLLOW_LOAD_UNLOADED_CHUNKS;
+    public static final ForgeConfigSpec.IntValue DIMENSION_FOLLOW_MAX_MOBS = TeleportConfig.DIMENSION_FOLLOW_MAX_MOBS;
 
     // ========== 功能配置 ==========
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> BLACKLISTED_MOBS = FeatureConfig.BLACKLISTED_MOBS;
@@ -40,6 +44,7 @@ public class Config {
     // ========== 物品配置 ==========
     public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS = FeatureConfig.PREVENT_CONTROLLED_MINION_ATTACKING_PLAYERS;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> CONTROLLED_MINION_ENTITIES = FeatureConfig.CONTROLLED_MINION_ENTITIES;
+    public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_BOSS_RETURN_HOME = FeatureConfig.PREVENT_CONTROLLED_BOSS_RETURN_HOME;
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING = FeatureConfig.CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
     public static final ForgeConfigSpec.IntValue BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT = FeatureConfig.BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MAX_RIDERS_PER_MOUNT = ItemConfig.MAX_RIDERS_PER_MOUNT;
