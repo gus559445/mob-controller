@@ -117,9 +117,18 @@ public final class DimensionFollow {
         List<Mob> result = new ArrayList<>();
         Set<UUID> seen = new HashSet<>();
 
-        // 出生点附近的受控生物留在原地（通常是基地里的伙伴）
+        // 重生点附近的受控生物留在原地（通常是基地里的伙伴）。
+        // 优先使用玩家自己在该维度设置的床/重生锚位置；未设置时才退回世界出生点。
         double excludeRadius = Config.DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS.get();
-        BlockPos spawnPos = excludeRadius > 0 ? fromLevel.getSharedSpawnPos() : null;
+        BlockPos spawnPos = null;
+        if (excludeRadius > 0) {
+            BlockPos respawnPos = player.getRespawnPosition();
+            if (respawnPos != null && pending.fromDimension().equals(player.getRespawnDimension())) {
+                spawnPos = respawnPos;
+            } else {
+                spawnPos = fromLevel.getSharedSpawnPos();
+            }
+        }
 
         // 1) 原维度中已加载的实体
         for (Entity entity : fromLevel.getEntities().getAll()) {

@@ -75,8 +75,9 @@ public class TeleportConfig {
     public static final ForgeConfigSpec.IntValue DIMENSION_FOLLOW_MAX_MOBS;
 
     /**
-     * 出生点保护半径（格）。
-     * 距离该维度出生点在此范围内的受控生物不会被跨维度带走（通常用于把基地里的伙伴留下）。
+     * 重生点保护半径（格）。
+     * 距离该维度重生点在此范围内的受控生物不会被跨维度带走（通常用于把基地里的伙伴留下）。
+     * 重生点取玩家睡觉/设置重生锚的位置；若玩家在该维度没有设置重生点，则退回世界出生点。
      * 0 表示不启用保护。默认 128.0（8 个区块）。
      */
     public static final ForgeConfigSpec.DoubleValue DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS;
@@ -140,8 +141,8 @@ public class TeleportConfig {
         builder.comment("");
 
         DIMENSION_FOLLOW_EXCLUDE_SPAWN_RADIUS = builder
-                .comment("出生点保护半径（格）：距该维度出生点在此范围内的受控生物不会被跨维度带走。"
-                        + "0 = 不启用。默认 128.0（8 个区块）")
+                .comment("重生点保护半径（格）：距该维度重生点（玩家床/重生锚；未设置时退回世界出生点）"
+                        + "在此范围内的受控生物不会被跨维度带走。0 = 不启用。默认 128.0（8 个区块）")
                 .defineInRange("dimension_follow_exclude_spawn_radius", 128.0, 0.0, 100000.0);
         SPEC = builder.build();
     }
