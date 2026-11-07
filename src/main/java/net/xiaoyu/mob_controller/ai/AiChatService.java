@@ -115,8 +115,8 @@ public final class AiChatService {
         JsonArray messages = new JsonArray();
         messages.add(message("system", systemPrompt(player, mob)));
 
-        List<AiChatSessions.Message> history = AiChatSessions.history(mob.getUUID());
-        for (AiChatSessions.Message turn : history) {
+        List<ChatMessage> history = AiChatSessions.history(mob.getUUID());
+        for (ChatMessage turn : history) {
             messages.add(message(turn.role(), turn.content()));
         }
         messages.add(message("user", userText));
