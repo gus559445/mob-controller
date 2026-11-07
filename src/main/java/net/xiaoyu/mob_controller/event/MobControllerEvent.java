@@ -428,6 +428,14 @@ public class MobControllerEvent {
                     UUID controllerUUID = MobControlledData.getControllerUUID(mob);
                     boolean isController = attacker instanceof Player && attacker.getUUID().equals(controllerUUID);
 
+                    // 防误伤：控制者直接挥击或用远程武器攻击自己的受控生物时取消伤害。
+                    // 潜行攻击不受影响（可以正常击杀自己的伙伴）。
+                    if (isController && Config.PREVENT_ACCIDENTAL_PET_DAMAGE.get()
+                            && !((Player) attacker).isShiftKeyDown()) {
+                        event.setCanceled(true);
+                        return;
+                    }
+
                     // 被控制的生物攻击攻击者[攻击者不是控制者]
                     if (!isController) {
                         if (!MobControlUtil.canRetaliateAgainstImmediateAttacker(mob, attacker)) {
