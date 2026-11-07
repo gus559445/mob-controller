@@ -26,12 +26,8 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class ControlledPositionCache {
 
-    /** 一只受控生物的最后已知状态。 */
-    public record Entry(UUID mobId, UUID ownerId, ResourceKey<Level> dimension,
-                        double x, double y, double z, String name, String typeId) {
-    }
 
-    private static final Map<UUID, Entry> CACHE = new ConcurrentHashMap<>();
+    private static final Map<UUID, PositionEntry> CACHE = new ConcurrentHashMap<>();
 
     private ControlledPositionCache() {
     }
@@ -43,7 +39,7 @@ public final class ControlledPositionCache {
             return;
         }
         ResourceLocation typeId = BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType());
-        CACHE.put(mob.getUUID(), new Entry(
+        CACHE.put(mob.getUUID(), new PositionEntry(
                 mob.getUUID(),
                 owner,
                 mob.level().dimension(),
@@ -59,9 +55,9 @@ public final class ControlledPositionCache {
     }
 
     /** 取某个玩家在某个维度里的全部已知位置。 */
-    public static List<Entry> forOwner(UUID owner, ResourceKey<Level> dimension) {
-        List<Entry> list = new ArrayList<>();
-        for (Entry entry : CACHE.values()) {
+    public static List<PositionEntry> forOwner(UUID owner, ResourceKey<Level> dimension) {
+        List<PositionEntry> list = new ArrayList<>();
+        for (PositionEntry entry : CACHE.values()) {
             if (entry.ownerId().equals(owner) && entry.dimension().equals(dimension)) {
                 list.add(entry);
             }
@@ -71,7 +67,7 @@ public final class ControlledPositionCache {
 
     /** 单只生物的最后已知位置。 */
     @Nullable
-    public static Entry get(UUID mobId) {
+    public static PositionEntry get(UUID mobId) {
         return CACHE.get(mobId);
     }
 }
