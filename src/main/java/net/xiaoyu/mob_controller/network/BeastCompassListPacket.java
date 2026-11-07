@@ -16,21 +16,19 @@ import java.util.function.Supplier;
  * <p>已经加载的实体给的是实时坐标；区块卸载了的用「最后已知位置」补上，
  * 并用 {@code loaded = false} 标出来。</p>
  */
-public record BeastCompassListPacket(List<Entry> entries) {
+public record BeastCompassListPacket(List<BeastCompassEntry> entries) {
 
     /** 列表里的一项。 */
-    public record Entry(UUID mobId, String name, String typeId, int x, int y, int z, int distance, boolean loaded) {
-    }
 
     public BeastCompassListPacket(FriendlyByteBuf buf) {
         this(readEntries(buf));
     }
 
-    private static List<Entry> readEntries(FriendlyByteBuf buf) {
+    private static List<BeastCompassEntry> readEntries(FriendlyByteBuf buf) {
         int size = buf.readVarInt();
-        List<Entry> list = new ArrayList<>(size);
+        List<BeastCompassEntry> list = new ArrayList<>(size);
         for (int i = 0; i < size; i++) {
-            list.add(new Entry(
+            list.add(new BeastCompassEntry(
                     new UUID(buf.readLong(), buf.readLong()),
                     buf.readUtf(64),
                     buf.readUtf(128),
@@ -46,7 +44,7 @@ public record BeastCompassListPacket(List<Entry> entries) {
 
     public void toBytes(FriendlyByteBuf buf) {
         buf.writeVarInt(this.entries().size());
-        for (Entry entry : this.entries()) {
+        for (BeastCompassEntry entry : this.entries()) {
             buf.writeLong(entry.mobId().getMostSignificantBits());
             buf.writeLong(entry.mobId().getLeastSignificantBits());
             buf.writeUtf(entry.name(), 64);
