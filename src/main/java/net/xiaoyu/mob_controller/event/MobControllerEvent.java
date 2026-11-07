@@ -547,6 +547,11 @@ public class MobControllerEvent {
         if (!MobControlledData.isControlledEntity(mob)) {
             return;
         }
+        // 被骑乘（身上驮着乘客）时保持原版 AI：不接管它的索敌/攻击判定，
+        // 否则会因目标不在受控敌对白名单里而被清空，表现为「追敌但不攻击」。
+        if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+            return;
+        }
         // 军团模式生物由单独的逻辑处理攻击行为，跳过索敌模式
         if (MobControlledData.isLegionMode(mob)) {
             return;
