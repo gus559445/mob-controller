@@ -232,30 +232,45 @@ public final class DimensionFollow {
         double x = player.getX() + (mob.getRandom().nextDouble() - 0.5) * SPREAD_RADIUS * 2.0;
         double z = player.getZ() + (mob.getRandom().nextDouble() - 0.5) * SPREAD_RADIUS * 2.0;
         double y = player.getY();
-        // 先记录乘客，迁移后逐个带回并重新骑乘（保持骑乘状态）
-        List<Entity> passengers = new ArrayList<>(mob.getPassengers());
         try {
-            Entity placed = mob.changeDimension(toLevel, new MobDimensionTeleporter(x, y, z));
-            if (placed == null) {
-                return false;
-            }
-            for (Entity passenger : passengers) {
-                // 玩家乘客自己会跨维度，不能重复传送
-                if (passenger.isRemoved() || passenger instanceof ServerPlayer) {
-                    continue;
-                }
-                passenger.stopRiding();
-                Entity newPassenger = passenger.changeDimension(toLevel, new MobDimensionTeleporter(x, y, z));
-                if (newPassenger != null) {
-                    newPassenger.stopRiding();
-                    newPassenger.startRiding(placed, true);
-                }
-            }
-            return true;
+            return teleportWithRiders(mob, toLevel, x, y, z) != null;
         } catch (Exception e) {
             LOGGER.error("Failed to move controlled mob {} across dimension: {}", mob.getUUID(), e.toString());
             return false;
         }
+    }
+
+    /**
+     * 递归传送实体及其全部乘客（支持 A 骑 B、B 骑 C 这种多层嵌套骑乘）。
+     *
+     * @param entity   要传送的实体
+     * @param toLevel  目标维度
+     * @param x        落点 X
+     * @param y        落点 Y
+     * @param z        落点 Z
+     * @return 传送后的实体；失败返回 {@code null}
+     */
+    private static Entity teleportWithRiders(Entity entity, ServerLevel toLevel, double x, double y, double z) {
+        List<Entity> riders = new ArrayList<>(entity.getPassengers());
+        Entity placed = entity.changeDimension(toLevel, new MobDimensionTeleporter(x, y, z));
+        if (placed == null) {
+            return null;
+        }
+        if (placed instanceof Mob placedMob) {
+            placedMob.setPersistenceRequired();
+            ControlledPositionCache.record(placedMob);
+        }
+        for (Entity rider : riders) {
+            // 玩家乘客自己会跨维度，不能重复传送
+            if (rider.isRemoved() || rider instanceof ServerPlayer) {
+                continue;
+            }
+            Entity newRider = teleportWithRiders(rider, toLevel, placed.getX(), placed.getY(), placed.getZ());
+            if (newRider != null) {
+                newRider.startRiding(placed, true);
+            }
+        }
+        return placed;
     }
 
     /**

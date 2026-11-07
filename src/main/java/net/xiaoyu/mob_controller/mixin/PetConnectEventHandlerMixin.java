@@ -10,6 +10,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.AABB;
 import net.xiaoyu.mob_controller.util.MobControlledData;
+import net.xiaoyu.mob_controller.util.RidingHelper;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
@@ -93,89 +94,27 @@ public abstract class PetConnectEventHandlerMixin {
         originalList.addAll(controlledMobs);
     }
 
-    /** 契约之戒右键前后的乘客快照：宠物 UUID -> 乘客 UUID 列表。 */
-    private static final Map<UUID, List<UUID>> MOB_CONTROLLER_PASSENGERS = new ConcurrentHashMap<>();
+    /** 契约之戒右键前后的骑乘关系快照（支持多层嵌套）。 */
+    private static final RidingHelper RIDING_HELPER = new RidingHelper();
 
     /**
-     * 右键前记录：附近受控生物身上骑着的实体。
+     * 右键前记录：当前维度内所有实体的骑乘关系。
      */
     @Inject(method = "rightClick", at = @At("HEAD"), remap = false, require = 0)
     private static void mobController$snapshotRiderPassengers(PlayerInteractEvent.RightClickItem event, CallbackInfo ci) {
-        MOB_CONTROLLER_PASSENGERS.clear();
-        if (!(event.getEntity() instanceof ServerPlayer player)) {
-            return;
-        }
-        Level level = player.level();
-        if (!(level instanceof ServerLevel serverLevel)) {
-            return;
-        }
-        for (Entity entity : serverLevel.getEntities().getAll()) {
-            if (!(entity instanceof LivingEntity living) || living.getPassengers().isEmpty()) {
-                continue;
-            }
-            if (!MobControlledData.isControlledEntity(living)) {
-                continue;
-            }
-            List<UUID> riders = new ArrayList<>();
-            for (Entity passenger : living.getPassengers()) {
-                riders.add(passenger.getUUID());
-            }
-            MOB_CONTROLLER_PASSENGERS.put(living.getUUID(), riders);
+        if (event.getEntity() instanceof ServerPlayer player && player.level() instanceof ServerLevel level) {
+            RIDING_HELPER.snapshot(level);
         }
     }
 
     /**
-     * 右键后恢复：被收容/放出的宠物如果换了维度，把乘客也带过去并保持骑乘。
+     * 右键后恢复：按快照把乘客重新骑回（多轮，兼容多层嵌套与跨维度）。
      */
     @Inject(method = "rightClick", at = @At("RETURN"), remap = false, require = 0)
     private static void mobController$restoreRiderPassengers(PlayerInteractEvent.RightClickItem event, CallbackInfo ci) {
-        if (MOB_CONTROLLER_PASSENGERS.isEmpty() || !(event.getEntity() instanceof ServerPlayer player)) {
-            MOB_CONTROLLER_PASSENGERS.clear();
-            return;
+        if (event.getEntity() instanceof ServerPlayer player) {
+            RIDING_HELPER.restore(player.getServer());
         }
-        List<UUID> stale = new ArrayList<>();
-        for (Map.Entry<UUID, List<UUID>> entry : MOB_CONTROLLER_PASSENGERS.entrySet()) {
-            Entity mount = mobController$findEntity(player, entry.getKey());
-            if (mount == null || mount.isRemoved()) {
-                stale.add(entry.getKey());
-                continue;
-            }
-            for (UUID riderId : entry.getValue()) {
-                Entity rider = mobController$findEntity(player, riderId);
-                if (rider == null || rider.isRemoved() || rider.getVehicle() == mount) {
-                    continue;
-                }
-                if (rider.level() == mount.level()) {
-                    rider.startRiding(mount, true);
-                } else if (mount.level() instanceof ServerLevel mountLevel) {
-                    Entity moved = rider.changeDimension(mountLevel,
-                            new MobDimensionTeleporter(mount.getX(), mount.getY(), mount.getZ()));
-                    if (moved != null) {
-                        moved.startRiding(mount, true);
-                    }
-                }
-            }
-        }
-        for (UUID id : stale) {
-            MOB_CONTROLLER_PASSENGERS.remove(id);
-        }
-        MOB_CONTROLLER_PASSENGERS.clear();
-    }
-
-    /**
-     * 在所有已加载维度中按 UUID 找实体。
-     */
-    private static Entity mobController$findEntity(ServerPlayer player, UUID uuid) {
-        if (player.getServer() == null) {
-            return null;
-        }
-        for (ServerLevel level : player.getServer().getAllLevels()) {
-            Entity entity = level.getEntities().get(uuid);
-            if (entity != null) {
-                return entity;
-            }
-        }
-        return null;
     }
 
 }
