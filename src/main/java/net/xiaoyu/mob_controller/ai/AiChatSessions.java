@@ -20,14 +20,12 @@ public final class AiChatSessions {
     private static final Map<UUID, Integer> TARGETS = new ConcurrentHashMap<>();
 
     /** 生物 UUID → 最近若干轮对话。 */
-    private static final Map<UUID, Deque<Message>> HISTORY = new ConcurrentHashMap<>();
+    private static final Map<UUID, Deque<ChatMessage>> HISTORY = new ConcurrentHashMap<>();
 
     private AiChatSessions() {
     }
 
     /** 一轮对话的一条消息。 */
-    public record Message(String role, String content) {
-    }
 
     public static void setTarget(UUID player, int entityId) {
         TARGETS.put(player, entityId);
@@ -47,8 +45,8 @@ public final class AiChatSessions {
     }
 
     /** 取这只生物的历史（按时间顺序），最多保留配置里的轮数。 */
-    public static List<Message> history(UUID mob) {
-        Deque<Message> deque = HISTORY.get(mob);
+    public static List<ChatMessage> history(UUID mob) {
+        Deque<ChatMessage> deque = HISTORY.get(mob);
         return deque == null ? List.of() : new ArrayList<>(deque);
     }
 
@@ -57,10 +55,10 @@ public final class AiChatSessions {
         if (maxTurns <= 0) {
             return;
         }
-        Deque<Message> deque = HISTORY.computeIfAbsent(mob, k -> new ArrayDeque<>());
+        Deque<ChatMessage> deque = HISTORY.computeIfAbsent(mob, k -> new ArrayDeque<>());
         synchronized (deque) {
-            deque.addLast(new Message("user", userText));
-            deque.addLast(new Message("assistant", replyText));
+            deque.addLast(new ChatMessage("user", userText));
+            deque.addLast(new ChatMessage("assistant", replyText));
             while (deque.size() > maxTurns * 2) {
                 deque.removeFirst();
             }
