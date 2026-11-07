@@ -19,6 +19,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Supplier;
+import net.xiaoyu.mob_controller.util.PositionEntry;
 
 /**
  * 回响指针：客户端右键后请求一份「当前维度里属于我的受控生物」清单。
@@ -50,7 +51,7 @@ public record BeastCompassRequestPacket(boolean deep) {
                 forceLoadCachedChunks(player, level);
             }
 
-            List<BeastCompassListPacket.Entry> entries = new ArrayList<>();
+            List<BeastCompassEntry> entries = new ArrayList<>();
             Set<UUID> seen = new HashSet<>();
 
             for (Entity entity : level.getEntities().getAll()) {
@@ -64,7 +65,7 @@ public record BeastCompassRequestPacket(boolean deep) {
                     continue;
                 }
                 seen.add(mob.getUUID());
-                entries.add(new BeastCompassListPacket.Entry(
+                entries.add(new BeastCompassEntry(
                         mob.getUUID(),
                         mob.getDisplayName().getString(),
                         BuiltInRegistries.ENTITY_TYPE.getKey(mob.getType()).toString(),
@@ -77,13 +78,13 @@ public record BeastCompassRequestPacket(boolean deep) {
             }
 
             // 区块卸载了的：用最后已知位置补上
-            for (ControlledPositionCache.Entry cached : ControlledPositionCache.forOwner(player.getUUID(), level.dimension())) {
+            for (PositionEntry cached : ControlledPositionCache.forOwner(player.getUUID(), level.dimension())) {
                 if (seen.contains(cached.mobId())) {
                     continue;
                 }
                 int distance = (int) Math.sqrt(
                         Math.pow(cached.x() - player.getX(), 2) + Math.pow(cached.z() - player.getZ(), 2));
-                entries.add(new BeastCompassListPacket.Entry(
+                entries.add(new BeastCompassEntry(
                         cached.mobId(),
                         cached.name(),
                         cached.typeId(),
@@ -95,7 +96,7 @@ public record BeastCompassRequestPacket(boolean deep) {
                 ));
             }
 
-            entries.sort(Comparator.comparingInt(BeastCompassListPacket.Entry::distance));
+            entries.sort(Comparator.comparingInt(BeastCompassEntry::distance));
 
             NetWorkManager.INSTANCE.send(
                     PacketDistributor.PLAYER.with(() -> player),
@@ -114,7 +115,7 @@ public record BeastCompassRequestPacket(boolean deep) {
     private void forceLoadCachedChunks(ServerPlayer player, ServerLevel level) {
         int limit = net.xiaoyu.mob_controller.Config.BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT.get();
         Set<Long> loaded = new HashSet<>();
-        for (ControlledPositionCache.Entry cached : ControlledPositionCache.forOwner(player.getUUID(), level.dimension())) {
+        for (PositionEntry cached : ControlledPositionCache.forOwner(player.getUUID(), level.dimension())) {
             int chunkX = net.minecraft.util.Mth.floor(cached.x()) >> 4;
             int chunkZ = net.minecraft.util.Mth.floor(cached.z()) >> 4;
             if (!loaded.add(((long) chunkX << 32) | (chunkZ & 0xFFFFFFFFL))) {
