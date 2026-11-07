@@ -9,7 +9,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraftforge.common.util.ITeleporter;
 import net.xiaoyu.mob_controller.Config;
 import net.xiaoyu.mob_controller.MobController;
 import org.apache.logging.log4j.LogManager;
@@ -18,7 +17,6 @@ import org.apache.logging.log4j.Logger;
 import javax.annotation.Nullable;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
 
 /**
  * 受控生物的跨维度自动跟随。
@@ -36,12 +34,11 @@ import java.util.function.Function;
 public final class DimensionFollow {
     private static final Logger LOGGER = LogManager.getLogger(MobController.MOD_ID);
 
-    /** 传送前记录的上下文。 */
-    private record PendingTravel(ResourceKey<Level> fromDimension, double x, double y, double z) {
-    }
+    /** playerUUID -> 传送前所在维度。 */
+    private static final Map<UUID, ResourceKey<Level>> PENDING_DIMENSION = new ConcurrentHashMap<>();
 
-    /** playerUUID -> 传送前所在维度与坐标。 */
-    private static final Map<UUID, PendingTravel> PENDING = new ConcurrentHashMap<>();
+    /** playerUUID -> 传送前坐标（x, y, z）。 */
+    private static final Map<UUID, double[]> PENDING_POSITION = new ConcurrentHashMap<>();
 
     /** 落点相对玩家的散布半径（格）。 */
     private static final double SPREAD_RADIUS = 2.0;
@@ -58,8 +55,9 @@ public final class DimensionFollow {
         if (!isEnabled()) {
             return;
         }
-        PENDING.put(player.getUUID(), new PendingTravel(
-                player.level().dimension(), player.getX(), player.getY(), player.getZ()));
+        UUID playerId = player.getUUID();
+        PENDING_DIMENSION.put(playerId, player.level().dimension());
+        PENDING_POSITION.put(playerId, new double[]{player.getX(), player.getY(), player.getZ()});
     }
 
     /**
@@ -69,24 +67,26 @@ public final class DimensionFollow {
      * @param toKey      目标维度
      */
     public static void onChangedDimension(ServerPlayer player, ResourceKey<Level> toKey) {
-        PendingTravel pending = PENDING.remove(player.getUUID());
-        if (pending == null || !isEnabled()) {
+        UUID playerId = player.getUUID();
+        ResourceKey<Level> fromDimension = PENDING_DIMENSION.remove(playerId);
+        double[] fromPos = PENDING_POSITION.remove(playerId);
+        if (fromDimension == null || fromPos == null || !isEnabled()) {
             return;
         }
-        if (pending.fromDimension().equals(toKey)) {
+        if (fromDimension.equals(toKey)) {
             return;
         }
         MinecraftServer server = player.getServer();
         if (server == null) {
             return;
         }
-        ServerLevel fromLevel = server.getLevel(pending.fromDimension());
+        ServerLevel fromLevel = server.getLevel(fromDimension);
         ServerLevel toLevel = server.getLevel(toKey);
         if (fromLevel == null || toLevel == null) {
             return;
         }
 
-        List<Mob> candidates = collectCandidates(player, fromLevel, pending);
+        List<Mob> candidates = collectCandidates(player, fromLevel, fromDimension, fromPos[0], fromPos[1], fromPos[2]);
         if (candidates.isEmpty()) {
             return;
         }
@@ -110,7 +110,8 @@ public final class DimensionFollow {
     /**
      * 收集需要带走的受控生物。
      */
-    private static List<Mob> collectCandidates(ServerPlayer player, ServerLevel fromLevel, PendingTravel pending) {
+    private static List<Mob> collectCandidates(ServerPlayer player, ServerLevel fromLevel,
+                                               ResourceKey<Level> fromDimension, double px, double py, double pz) {
         UUID ownerUUID = player.getUUID();
         double range = Config.DIMENSION_FOLLOW_RANGE.get();
         boolean limited = range > 0;
@@ -123,7 +124,7 @@ public final class DimensionFollow {
         BlockPos spawnPos = null;
         if (excludeRadius > 0) {
             BlockPos respawnPos = player.getRespawnPosition();
-            if (respawnPos != null && pending.fromDimension().equals(player.getRespawnDimension())) {
+            if (respawnPos != null && fromDimension.equals(player.getRespawnDimension())) {
                 spawnPos = respawnPos;
             } else {
                 spawnPos = fromLevel.getSharedSpawnPos();
@@ -138,7 +139,7 @@ public final class DimensionFollow {
             if (!isOwnedBy(mob, ownerUUID)) {
                 continue;
             }
-            if (limited && mob.distanceToSqr(pending.x(), pending.y(), pending.z()) > range * range) {
+            if (limited && mob.distanceToSqr(px, py, pz) > range * range) {
                 continue;
             }
             if (isNearSpawn(mob.getX(), mob.getY(), mob.getZ(), spawnPos, excludeRadius)) {
@@ -156,12 +157,12 @@ public final class DimensionFollow {
         Set<UUID> missing = new LinkedHashSet<>();
         List<double[]> missingPos = new ArrayList<>();
         for (ControlledPositionCache.Entry cached
-                : ControlledPositionCache.forOwner(ownerUUID, pending.fromDimension())) {
+                : ControlledPositionCache.forOwner(ownerUUID, fromDimension)) {
             if (seen.contains(cached.mobId())) {
                 continue;
             }
             if (limited && distSqr(cached.x(), cached.y(), cached.z(),
-                    pending.x(), pending.y(), pending.z()) > range * range) {
+                    px, py, pz) > range * range) {
                 continue;
             }
             if (isNearSpawn(cached.x(), cached.y(), cached.z(), spawnPos, excludeRadius)) {
@@ -170,12 +171,12 @@ public final class DimensionFollow {
             missing.add(cached.mobId());
             missingPos.add(new double[]{cached.x(), cached.y(), cached.z()});
         }
-        String fromDimId = pending.fromDimension().location().toString();
+        String fromDimId = fromDimension.location().toString();
         for (HighHealthDatabase.PersistedMobPos pos : HighHealthDatabase.listPositions(ownerUUID)) {
             if (!fromDimId.equals(pos.dimension()) || seen.contains(pos.mobUUID())) {
                 continue;
             }
-            if (limited && distSqr(pos.x(), pos.y(), pos.z(), pending.x(), pending.y(), pending.z()) > range * range) {
+            if (limited && distSqr(pos.x(), pos.y(), pos.z(), px, py, pz) > range * range) {
                 continue;
             }
             if (isNearSpawn(pos.x(), pos.y(), pos.z(), spawnPos, excludeRadius)) {
@@ -232,22 +233,17 @@ public final class DimensionFollow {
         double z = player.getZ() + (mob.getRandom().nextDouble() - 0.5) * SPREAD_RADIUS * 2.0;
         double y = player.getY();
         try {
-            Entity placed = mob.changeDimension(toLevel, new ITeleporter() {
-                @Override
-                public Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel destWorld,
-                                          float yaw, Function<Boolean, Entity> repositionEntity) {
-                    Entity result = repositionEntity.apply(true);
-                    if (result != null) {
-                        result.moveTo(x, y, z, yaw, result.getXRot());
-                        if (result instanceof Mob placedMob) {
-                            placedMob.setPersistenceRequired();
-                            ControlledPositionCache.record(placedMob);
-                        }
-                    }
-                    return result;
-                }
-            });
-            return placed != null;
+            // 不实现 ITeleporter（避免依赖匿名内部类），直接走原版跨维度迁移后再覆写落点
+            Entity placed = mob.changeDimension(toLevel);
+            if (placed == null) {
+                return false;
+            }
+            placed.moveTo(x, y, z, placed.getYRot(), placed.getXRot());
+            if (placed instanceof Mob placedMob) {
+                placedMob.setPersistenceRequired();
+                ControlledPositionCache.record(placedMob);
+            }
+            return true;
         } catch (Exception e) {
             LOGGER.error("Failed to move controlled mob {} across dimension: {}", mob.getUUID(), e.toString());
             return false;
@@ -297,6 +293,7 @@ public final class DimensionFollow {
      * 清空待处理上下文（服务器停止时调用）。
      */
     public static void clear() {
-        PENDING.clear();
+        PENDING_DIMENSION.clear();
+        PENDING_POSITION.clear();
     }
 }
