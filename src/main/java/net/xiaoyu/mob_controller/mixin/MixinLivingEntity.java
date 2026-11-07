@@ -56,6 +56,11 @@ public abstract class MixinLivingEntity extends Entity {
     private void injectCanAttack(LivingEntity target, CallbackInfoReturnable<Boolean> cir) {
         if (cir.getReturnValue()) {
             if ((Object) this instanceof LivingEntity mob) {
+                // 被骑乘（身上驮着乘客）时保持原版 AI：不做受控敌友判定，
+                // 否则受控生物会打不了任何目标（苦力怕不炸、突变生物不攻击）。
+                if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+                    return;
+                }
                 if (MobControlledData.isControlledEntity(mob)
                         && !MobControlUtil.canKeepCombatTarget(mob, target)) {
                     cir.cancel();
