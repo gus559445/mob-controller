@@ -852,16 +852,6 @@ public class MobControlledData {
      * @param highHealthMob    是否为高生命值生物
      * @param deathCause       死因描述（纯文本，不含生物名）
      */
-    private record PendingRespawnData(
-            UUID deadMobUUID, UUID controllerUUID, CompoundTag entityNbt,
-            CompoundTag capabilityNbt, int triggerTick,
-            ResourceKey<Level> deathDimension,
-            BlockPos deathPos,
-            String mobTypeId,
-            boolean highHealthMob,
-            String deathCause
-    ) {
-    }
 
     /**
      * 单体切换生物的索敌模式
