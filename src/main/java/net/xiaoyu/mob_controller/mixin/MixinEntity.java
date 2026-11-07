@@ -70,6 +70,12 @@ public abstract class MixinEntity implements Nameable, EntityAccess, CommandSour
     private void injectGetControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         Object thiz = this;
         if (thiz instanceof LivingEntity mob) {
+            // 只有「可骑乘」的受控生物才把自己的控制者当骑乘操作者。
+            // 否则像苦力怕这种本来不可骑的生物一旦被骑，原版会关掉 Goal.Flag.MOVE，
+            // 它的移动与攻击 goal 全部失效（表现为追敌但不攻击、不爆炸）。
+            if (mob instanceof Mob rideableCheck && !MobControlUtil.isDirectRideableControlledMob(rideableCheck)) {
+                return;
+            }
             Entity entity = this.getFirstPassenger();
             if (entity != null && MobControlledData.isControlledEntity(mob) && MobControlledData.getControllerUUID(mob)
                 .equals(entity.getUUID())) {
