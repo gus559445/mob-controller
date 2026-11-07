@@ -13,6 +13,7 @@ import net.xiaoyu.mob_controller.network.BeastCompassSelectPacket;
 import net.xiaoyu.mob_controller.network.NetWorkManager;
 
 import java.util.List;
+import net.xiaoyu.mob_controller.network.BeastCompassEntry;
 
 /**
  * 寻兽罗盘的列表界面：列出当前维度里你驯服的生物，点一个就开始指向它。
@@ -25,7 +26,7 @@ public class BeastCompassScreen extends Screen {
     private static final int ROW_H = 20;
     private static final int ROW_GAP = 24;
 
-    private final List<BeastCompassListPacket.Entry> entries;
+    private final List<BeastCompassEntry> entries;
     private int page;
 
     // 下面这几个都按当前屏幕尺寸算出来，见 ensureLayout()
@@ -33,7 +34,7 @@ public class BeastCompassScreen extends Screen {
     private int rowHeight = 22;
     private int listWidth = 300;
 
-    public BeastCompassScreen(List<BeastCompassListPacket.Entry> entries) {
+    public BeastCompassScreen(List<BeastCompassEntry> entries) {
         super(Component.translatable("mob_controller.beast_compass.title"));
         this.entries = entries;
     }
@@ -71,7 +72,7 @@ public class BeastCompassScreen extends Screen {
         int from = page * pageSize;
         int to = Math.min(entries.size(), from + pageSize);
         for (int i = from; i < to; i++) {
-            BeastCompassListPacket.Entry entry = entries.get(i);
+            BeastCompassEntry entry = entries.get(i);
             Component label = Component.literal(entry.name())
                     .append(Component.literal("  " + entry.typeId()).withStyle(ChatFormatting.GRAY))
                     .append(Component.literal("  " + entry.distance() + "m").withStyle(ChatFormatting.DARK_GREEN))
