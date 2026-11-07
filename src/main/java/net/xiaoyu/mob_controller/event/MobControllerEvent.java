@@ -865,9 +865,14 @@ public class MobControllerEvent {
                 }
 
                 if (mob instanceof Creeper creeper && creeper.isVehicle() && creeper.tickCount % 20 == 0) {
-                    LOGGER.info("[debug] ridden creeper target={} noAi={} riders={} invul={}",
-                            creeper.getTarget(), creeper.isNoAi(),
-                            creeper.getPassengers().size(), creeper.isInvulnerable());
+                    LivingEntity dbgTarget = creeper.getTarget();
+                    LOGGER.info("[debug] rider={} target={} distSq={} ctrl={} canAttack={} noAi={}",
+                            creeper.getFirstPassenger() != null ? creeper.getFirstPassenger().getType() : "null",
+                            dbgTarget,
+                            dbgTarget != null ? (int) creeper.distanceToSqr(dbgTarget) : -1,
+                            creeper.getControllingPassenger(),
+                            dbgTarget != null && creeper.canAttack(dbgTarget),
+                            creeper.isNoAi());
                 }
                 if (!mob.level().isClientSide) {
                     mob.getCapability(MobControlCapabilityProvider.MOB_CONTROL_CAPABILITY).ifPresent(cap ->

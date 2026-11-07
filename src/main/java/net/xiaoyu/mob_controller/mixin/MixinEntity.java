@@ -1,5 +1,6 @@
 package net.xiaoyu.mob_controller.mixin;
 
+import net.xiaoyu.mob_controller.Config;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.world.Nameable;
 import net.minecraft.world.entity.Entity;
@@ -70,9 +71,14 @@ public abstract class MixinEntity implements Nameable, EntityAccess, CommandSour
     private void injectGetControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         Object thiz = this;
         if (thiz instanceof LivingEntity mob) {
-            // 只有「可骑乘」的受控生物才把自己的控制者当骑乘操作者。
-            // 否则像苦力怕这种本来不可骑的生物一旦被骑，原版会关掉 Goal.Flag.MOVE，
-            // 它的移动与攻击 goal 全部失效（表现为追敌但不攻击、不爆炸）。
+            // 被骑乘时保持原版 AI：不把乘客登记为「驾驶者」。
+            // 一旦 getControllingPassenger 返回非空，原版 updateControlFlags 会关闭
+            // Goal.Flag.MOVE，该生物的移动与攻击 goal 全部失效
+            //（表现为追敌但不攻击、苦力怕不爆炸）。配置项可关闭此行为。
+            if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+                return;
+            }
+            // 未开启该开关时，仍只允许「可骑乘」的受控生物被驾驶。
             if (mob instanceof Mob rideableCheck && !MobControlUtil.isDirectRideableControlledMob(rideableCheck)) {
                 return;
             }
