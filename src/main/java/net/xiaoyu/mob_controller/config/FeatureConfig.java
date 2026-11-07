@@ -124,6 +124,12 @@ public class FeatureConfig {
     public static final ForgeConfigSpec.BooleanValue PREVENT_CONTROLLED_BOSS_RETURN_HOME;
 
     /**
+     * 是否启用「防误伤」：控制者直接挥击或用远程武器攻击自己的受控生物时取消伤害。
+     * 潜行攻击不受影响，仍可正常击杀自己的伙伴。
+     */
+    public static final ForgeConfigSpec.BooleanValue PREVENT_ACCIDENTAL_PET_DAMAGE;
+
+    /**
      * 受控生物（及其召唤物）引发的爆炸，是否不破坏方块。
      */
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
@@ -290,6 +296,12 @@ public class FeatureConfig {
                         "留空 = 只走自动识别。")
                 .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
 
+        builder.comment("");
+
+        PREVENT_ACCIDENTAL_PET_DAMAGE = builder
+                .comment("启用防误伤：控制者直接挥击或用远程武器攻击自己的受控生物时不会造成伤害。",
+                        "潜行（Shift）攻击不受此限制，仍可正常击杀自己的伙伴。默认 true")
+                .define("prevent_accidental_pet_damage", true);
         builder.comment("");
 
         PREVENT_CONTROLLED_BOSS_RETURN_HOME = builder
