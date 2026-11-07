@@ -596,8 +596,11 @@ public class MobControllerEvent {
         // 判断是否为基于 Brain 的生物
         boolean isBrainMob = mob instanceof AbstractPiglin || mob instanceof Hoglin || mob instanceof Zoglin;
 
-        // 搜寻攻击范围内的敌对生物
+        // 搜寻攻击范围内的敌对生物（被骑乘时适当放宽，避免稍远的敌人搜不到）
         double followRange = mob.getAttributeValue(Attributes.FOLLOW_RANGE);
+        if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+            followRange = Math.max(followRange, 48.0D);
+        }
         AABB searchArea = mob.getBoundingBox().inflate(followRange, 4.0, followRange);
         List<LivingEntity> potentialTargets = mob.level().getEntitiesOfClass(
                 LivingEntity.class, searchArea,
@@ -843,9 +846,13 @@ public class MobControllerEvent {
             if (MobControlledData.isControlledEntity(mob)) {
                 LivingEntity target = mob.getTarget();
 
-                // 目标不存在/死亡/不再存活时清除
+                // 目标不存在/死亡/不再存活时清除；
+                // 但被骑乘的实体保持原版 AI，不因「距离过远」而丢掉目标
+                // （否则目标一锁上就被清掉，表现为苦力怕追到一半停住、不爆炸）。
+                boolean keepFarTarget = Config.KEEP_MOUNT_AI.get() && mob.isVehicle();
                 if (target == null || target.isDeadOrDying() || !target.isAlive() ||
-                        !target.level().equals(mob.level()) || target.distanceTo(mob) > 64.0F) {
+                        !target.level().equals(mob.level())
+                        || (!keepFarTarget && target.distanceTo(mob) > 64.0F)) {
 
                     if (target != null) {
                         mob.setTarget(null);
