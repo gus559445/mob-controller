@@ -39,7 +39,7 @@ public final class BeastCompassHud {
             return;
         }
 
-        ClientBeastCompass.Target target = ClientBeastCompass.target();
+        BeastCompassTarget target = ClientBeastCompass.target();
         if (target == null) {
             return;
         }
