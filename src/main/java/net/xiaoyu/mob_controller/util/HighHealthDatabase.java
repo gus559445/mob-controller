@@ -310,8 +310,6 @@ public class HighHealthDatabase {
      * @param y         方块 Y
      * @param z         方块 Z
      */
-    public record PersistedMobPos(UUID mobUUID, String dimension, int x, int y, int z) {
-    }
 
     /**
      * 查询某控制者名下全部存活受控生物的持久化位置记录。
