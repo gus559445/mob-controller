@@ -96,6 +96,7 @@
     "cataclysm.MixinScyllaNoRespawner",
     "cataclysm.MixinMaledictusNoRespawner",
     "cataclysm.MixinBossReturnToHome",
+    "cataclysm.MixinLaserBeamSafeHit",
     "mutantmore.MutantBlazeHeatMixin"
   ],
   "client": [],
