@@ -1,5 +1,6 @@
 package net.xiaoyu.mob_controller.mixin;
 
+import net.xiaoyu.mob_controller.Config;
 import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.monster.Guardian;
 import net.minecraft.world.entity.monster.Skeleton;
@@ -149,6 +150,11 @@ public abstract class MixinMob extends LivingEntity implements Targeting {
     private void injectGetControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         Object thiz = this;
         if (thiz instanceof Mob mob) {
+            // 被骑乘时保持原版 AI：不登记驾驶者（与 MixinEntity 保持一致，
+            // 本注入在后者之后执行，不加这层会把控制者又写回去）
+            if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+                return;
+            }
             if (MobControlUtil.isDirectRideableControlledMob(mob)) {
                 Entity entity = this.getFirstPassenger();
                 if (entity != null && MobControlledData.isControlledEntity(mob) && MobControlledData.getControllerUUID(mob)
