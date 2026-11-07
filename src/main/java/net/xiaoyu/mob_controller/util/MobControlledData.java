@@ -546,7 +546,8 @@ public class MobControlledData {
                         mob.blockPosition(),
                         mobTypeId,
                         highHealthMob,
-                        deathCause != null ? deathCause : ""
+                        deathCause != null ? deathCause : "",
+                        collectPassengerIds(mob)
                 )
         );
         savePendingRespawns(server);
@@ -609,6 +610,9 @@ public class MobControlledData {
                 // ★ 重生：添加控制时跳过高生命记录（数据库已在 markAsRespawning 中保留记录）
                 addControlledMob(data.controllerUUID(), respawnedMob, true, true);
 
+                // 恢复死亡前骑在它身上的实体（保持骑乘状态）
+                restorePassengers(server, respawnedMob, data.passengerIds());
+
                 // ★ 更新数据库：将旧的标记记录更新为新实体的信息 ★
                 CompoundTag newNbt = respawnedMob.saveWithoutId(new CompoundTag());
                 HighHealthDatabase.respawnCompleted(data.controllerUUID(), data.deadMobUUID(), respawnedMob, newNbt);
@@ -632,6 +636,61 @@ public class MobControlledData {
                 PENDING_RESPAWNS.remove(deadMobUUID);
             }
             savePendingRespawns(server);
+        }
+    }
+
+    /**
+     * 收集当前骑在该生物身上的实体 UUID（用于重生后恢复骑乘）。
+     *
+     * @param mob 生物
+     * @return 乘客 UUID 列表
+     */
+    private static List<UUID> collectPassengerIds(Mob mob) {
+        if (mob.getPassengers().isEmpty()) {
+            return List.of();
+        }
+        List<UUID> ids = new ArrayList<>();
+        for (Entity passenger : mob.getPassengers()) {
+            ids.add(passenger.getUUID());
+        }
+        return ids;
+    }
+
+    /**
+     * 重生后把死亡前的乘客重新骑回该生物。
+     *
+     * @param server       服务器实例
+     * @param mount        重生后的生物
+     * @param passengerIds 乘客 UUID 列表
+     */
+    private static void restorePassengers(MinecraftServer server, Mob mount, List<UUID> passengerIds) {
+        if (passengerIds == null || passengerIds.isEmpty()) {
+            return;
+        }
+        for (UUID id : passengerIds) {
+            Entity passenger = null;
+            for (ServerLevel level : server.getAllLevels()) {
+                passenger = level.getEntities().get(id);
+                if (passenger != null) {
+                    break;
+                }
+            }
+            if (passenger == null || passenger.isRemoved()) {
+                continue;
+            }
+            if (passenger.level() != mount.level()) {
+                if (!(mount.level() instanceof ServerLevel mountLevel)) {
+                    continue;
+                }
+                Entity moved = passenger.changeDimension(mountLevel,
+                        new MobDimensionTeleporter(mount.getX(), mount.getY(), mount.getZ()));
+                if (moved == null) {
+                    continue;
+                }
+                passenger = moved;
+            }
+            passenger.stopRiding();
+            passenger.startRiding(mount, true);
         }
     }
 
@@ -768,7 +827,8 @@ public class MobControlledData {
                                 deathPos,
                                 respawnTag.getString("mobTypeId"),
                                 respawnTag.getBoolean("highHealthMob"),
-                                deathCause
+                                deathCause,
+                                List.of()
                         )
                 );
             }

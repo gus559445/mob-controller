@@ -5,6 +5,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
+import java.util.List;
 import java.util.UUID;
 
 /**
@@ -20,6 +21,7 @@ public record PendingRespawnData(
         BlockPos deathPos,
         String mobTypeId,
         boolean highHealthMob,
-        String deathCause
+        String deathCause,
+        List<UUID> passengerIds
 ) {
 }

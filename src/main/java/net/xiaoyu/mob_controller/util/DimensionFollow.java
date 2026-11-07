@@ -240,12 +240,14 @@ public final class DimensionFollow {
                 return false;
             }
             for (Entity passenger : passengers) {
-                if (passenger.isRemoved()) {
+                // 玩家乘客自己会跨维度，不能重复传送
+                if (passenger.isRemoved() || passenger instanceof ServerPlayer) {
                     continue;
                 }
                 passenger.stopRiding();
                 Entity newPassenger = passenger.changeDimension(toLevel, new MobDimensionTeleporter(x, y, z));
                 if (newPassenger != null) {
+                    newPassenger.stopRiding();
                     newPassenger.startRiding(placed, true);
                 }
             }
