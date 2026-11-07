@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import net.xiaoyu.mob_controller.util.PositionEntry;
 
 /**
  * 服务端侧的「谁在追踪哪只生物」表。
@@ -60,7 +61,7 @@ public final class BeastCompassTracker {
         }
 
         // 2) 没加载：退回最后已知位置
-        ControlledPositionCache.Entry cached = ControlledPositionCache.get(mobId);
+        PositionEntry cached = ControlledPositionCache.get(mobId);
         if (cached != null && cached.ownerId().equals(player.getUUID())
                 && cached.dimension().equals(player.level().dimension())) {
             return new BeastCompassTrackPacket(mobId, cached.name(),
