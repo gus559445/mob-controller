@@ -232,16 +232,22 @@ public final class DimensionFollow {
         double x = player.getX() + (mob.getRandom().nextDouble() - 0.5) * SPREAD_RADIUS * 2.0;
         double z = player.getZ() + (mob.getRandom().nextDouble() - 0.5) * SPREAD_RADIUS * 2.0;
         double y = player.getY();
+        // 先记录乘客，迁移后逐个带回并重新骑乘（保持骑乘状态）
+        List<Entity> passengers = new ArrayList<>(mob.getPassengers());
         try {
-            // 不实现 ITeleporter（避免依赖匿名内部类），直接走原版跨维度迁移后再覆写落点
-            Entity placed = mob.changeDimension(toLevel);
+            Entity placed = mob.changeDimension(toLevel, new MobDimensionTeleporter(x, y, z));
             if (placed == null) {
                 return false;
             }
-            placed.moveTo(x, y, z, placed.getYRot(), placed.getXRot());
-            if (placed instanceof Mob placedMob) {
-                placedMob.setPersistenceRequired();
-                ControlledPositionCache.record(placedMob);
+            for (Entity passenger : passengers) {
+                if (passenger.isRemoved()) {
+                    continue;
+                }
+                passenger.stopRiding();
+                Entity newPassenger = passenger.changeDimension(toLevel, new MobDimensionTeleporter(x, y, z));
+                if (newPassenger != null) {
+                    newPassenger.startRiding(placed, true);
+                }
             }
             return true;
         } catch (Exception e) {
