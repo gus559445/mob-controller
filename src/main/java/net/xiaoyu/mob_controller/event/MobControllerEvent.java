@@ -975,6 +975,11 @@ public class MobControllerEvent {
     @SubscribeEvent
     public static void onLivingChangeTargetEvent(LivingChangeTargetEvent event) {
         if (event.getEntity() instanceof Mob mob && event.getNewTarget() != null) {
+            // 被骑乘的实体（身上驮着乘客）保持原版 AI：跳过受控生物的目标过滤，
+            // 让它的攻击与技能逻辑照常运行。
+            if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+                return;
+            }
             // 受控生物召唤出来的仆从不许主动锁玩家
             if (ControlledMinionHelper.shouldBlockPlayerTarget(mob, event.getNewTarget())) {
                 event.setNewTarget(null);

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raider;
 import net.minecraft.world.level.Level;
+import net.xiaoyu.mob_controller.Config;
 import net.xiaoyu.mob_controller.util.MobControlledData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,6 +30,11 @@ public abstract class MixinRaider extends PatrollingMonster {
     @Inject(method = "aiStep()V", at = @At("HEAD"))
     private void onAiStep(CallbackInfo ci) {
         Raider raider = (Raider) (Object) this;
+        // 被骑乘（身上驮着乘客）时保持原版 AI：不移除攻击目标选择器，
+        // 让它自己的攻击与技能逻辑照常运行。
+        if (Config.KEEP_MOUNT_AI.get() && raider.isVehicle()) {
+            return;
+        }
         if (MobControlledData.isControlledEntity(raider)) {
             new ArrayList<>(raider.targetSelector.getAvailableGoals()).forEach(wrapped -> {
                 Goal g = wrapped.getGoal();

@@ -130,6 +130,12 @@ public class FeatureConfig {
     public static final ForgeConfigSpec.BooleanValue PREVENT_ACCIDENTAL_PET_DAMAGE;
 
     /**
+     * 被骑乘（身上驮着乘客）的受控生物是否保持原版 AI。
+     * 开启后不再对它做受控生物的目标过滤，攻击与技能由它自己的 AI 决定。
+     */
+    public static final ForgeConfigSpec.BooleanValue KEEP_MOUNT_AI;
+
+    /**
      * 受控生物（及其召唤物）引发的爆炸，是否不破坏方块。
      */
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
@@ -296,6 +302,12 @@ public class FeatureConfig {
                         "留空 = 只走自动识别。")
                 .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
 
+        builder.comment("");
+
+        KEEP_MOUNT_AI = builder
+                .comment("被骑乘的受控生物保持原版 AI：为 true 时不再参与受控生物的目标过滤，",
+                        "它自己的攻击与技能逻辑照常运行。默认 true")
+                .define("keep_mount_ai", true);
         builder.comment("");
 
         PREVENT_ACCIDENTAL_PET_DAMAGE = builder
