@@ -10,6 +10,7 @@ import net.xiaoyu.mob_controller.util.ControlledPositionCache;
 
 import java.util.UUID;
 import java.util.function.Supplier;
+import net.xiaoyu.mob_controller.util.PositionEntry;
 
 /**
  * 客户端在列表里点了某只生物：服务端记下追踪目标。
@@ -44,7 +45,7 @@ public record BeastCompassSelectPacket(UUID mobId, String name) {
                 return;
             }
 
-            ControlledPositionCache.Entry cached = ControlledPositionCache.get(this.mobId());
+            PositionEntry cached = ControlledPositionCache.get(this.mobId());
             if (cached == null) {
                 player.displayClientMessage(
                         Component.translatable("mob_controller.beast_compass.not_yours").withStyle(ChatFormatting.RED),
