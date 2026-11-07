@@ -8,6 +8,7 @@ import net.xiaoyu.mob_controller.network.BeastCompassListPacket;
 import net.xiaoyu.mob_controller.network.BeastCompassTrackPacket;
 
 import java.util.List;
+import net.xiaoyu.mob_controller.network.BeastCompassEntry;
 
 /**
  * 寻兽罗盘的客户端状态：当前追踪目标 + 打开列表界面。
@@ -16,17 +17,15 @@ import java.util.List;
 public final class ClientBeastCompass {
 
     /** 当前追踪的目标（null 表示没选）。 */
-    private static volatile Target target;
+    private static volatile BeastCompassTarget target;
 
     private ClientBeastCompass() {
     }
 
     /** 追踪目标快照。 */
-    public record Target(java.util.UUID mobId, String name, double x, double y, double z, boolean loaded) {
-    }
 
     /** 收到服务端列表后弹界面。 */
-    public static void openScreen(List<BeastCompassListPacket.Entry> entries) {
+    public static void openScreen(List<BeastCompassEntry> entries) {
         Minecraft.getInstance().setScreen(new BeastCompassScreen(entries));
     }
 
@@ -36,10 +35,10 @@ public final class ClientBeastCompass {
             target = null;
             return;
         }
-        target = new Target(packet.mobId(), packet.name(), packet.x(), packet.y(), packet.z(), packet.loaded());
+        target = new BeastCompassTarget(packet.mobId(), packet.name(), packet.x(), packet.y(), packet.z(), packet.loaded());
     }
 
-    public static Target target() {
+    public static BeastCompassTarget target() {
         return target;
     }
 
