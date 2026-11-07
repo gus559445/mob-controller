@@ -76,7 +76,8 @@ public final class RidingHelper {
                 break;
             }
         }
-        pairs.clear();
+        // 注意：不在这里清空快照。收容时记录、放出后才用得着，
+        // 若在收容那次（宠物已被传走）就清掉，放出时就无据可依了。
     }
 
     /** 在所有已加载维度中按 UUID 查找实体。 */

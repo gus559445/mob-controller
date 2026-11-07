@@ -61,6 +61,12 @@ public abstract class PetConnectEventHandlerMixin {
 
         // 添加受控生物到结果列表
         originalList.addAll(controlledMobs);
+
+        // 收容前记录完整骑乘链（支持 A 骑 B 骑 C 多层嵌套），
+        // 放出后由 rightClick 的 RETURN 注入按此恢复。
+        if (!originalList.isEmpty() && player.level() instanceof ServerLevel serverLevel) {
+            RIDING_HELPER.snapshot(serverLevel);
+        }
     }
 
     /**
@@ -96,16 +102,6 @@ public abstract class PetConnectEventHandlerMixin {
 
     /** 契约之戒右键前后的骑乘关系快照（支持多层嵌套）。 */
     private static final RidingHelper RIDING_HELPER = new RidingHelper();
-
-    /**
-     * 右键前记录：当前维度内所有实体的骑乘关系。
-     */
-    @Inject(method = "rightClick", at = @At("HEAD"), remap = false, require = 0)
-    private static void mobController$snapshotRiderPassengers(PlayerInteractEvent.RightClickItem event, CallbackInfo ci) {
-        if (event.getEntity() instanceof ServerPlayer player && player.level() instanceof ServerLevel level) {
-            RIDING_HELPER.snapshot(level);
-        }
-    }
 
     /**
      * 右键后恢复：按快照把乘客重新骑回（多轮，兼容多层嵌套与跨维度）。
