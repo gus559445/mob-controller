@@ -1,5 +1,8 @@
 package net.xiaoyu.mob_controller.event;
 
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import net.minecraft.world.entity.monster.Creeper;
 import com.mojang.blaze3d.platform.InputConstants;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -91,6 +94,8 @@ import java.util.UUID;
  */
 @Mod.EventBusSubscriber
 public class MobControllerEvent {
+    private static final Logger LOGGER = LogManager.getLogger("mob_controller-debug");
+
     private static final int HEAL_INTERVAL_TICKS = 2;
 
     /**
@@ -854,6 +859,11 @@ public class MobControllerEvent {
                     }
                 }
 
+                if (mob instanceof Creeper creeper && creeper.isVehicle() && creeper.tickCount % 20 == 0) {
+                    LOGGER.info("[debug] ridden creeper target={} noAi={} riders={} invul={}",
+                            creeper.getTarget(), creeper.isNoAi(),
+                            creeper.getPassengers().size(), creeper.isInvulnerable());
+                }
                 if (!mob.level().isClientSide) {
                     mob.getCapability(MobControlCapabilityProvider.MOB_CONTROL_CAPABILITY).ifPresent(cap ->
                             NetWorkManager.INSTANCE.send(
