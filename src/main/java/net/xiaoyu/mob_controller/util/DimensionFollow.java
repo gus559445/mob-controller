@@ -156,7 +156,7 @@ public final class DimensionFollow {
         }
         Set<UUID> missing = new LinkedHashSet<>();
         List<double[]> missingPos = new ArrayList<>();
-        for (ControlledPositionCache.Entry cached
+        for (PositionEntry cached
                 : ControlledPositionCache.forOwner(ownerUUID, fromDimension)) {
             if (seen.contains(cached.mobId())) {
                 continue;
@@ -172,7 +172,7 @@ public final class DimensionFollow {
             missingPos.add(new double[]{cached.x(), cached.y(), cached.z()});
         }
         String fromDimId = fromDimension.location().toString();
-        for (HighHealthDatabase.PersistedMobPos pos : HighHealthDatabase.listPositions(ownerUUID)) {
+        for (PersistedMobPos pos : HighHealthDatabase.listPositions(ownerUUID)) {
             if (!fromDimId.equals(pos.dimension()) || seen.contains(pos.mobUUID())) {
                 continue;
             }
