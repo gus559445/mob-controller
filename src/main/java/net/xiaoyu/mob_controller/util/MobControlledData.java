@@ -660,9 +660,22 @@ public class MobControlledData {
      * @param mount 被骑的实体
      * @return 骑乘对列表
      */
-    private static List<UUID[]> collectRidingPairs(Entity mount) {
+    private static List<UUID[]> collectRidingPairs(Entity entity) {
         List<UUID[]> pairs = new ArrayList<>();
-        collectRidingPairs(mount, pairs);
+        // 向下：谁骑在它身上（支持多层）
+        collectRidingPairs(entity, pairs);
+        // 向上：它骑在谁身上，以及那之上还有谁（a 骑 b、b 骑 c 时把 b->c 也带上）
+        Entity current = entity;
+        java.util.Set<UUID> seen = new java.util.HashSet<>();
+        seen.add(entity.getUUID());
+        while (current.getVehicle() != null) {
+            Entity vehicle = current.getVehicle();
+            if (!seen.add(vehicle.getUUID())) {
+                break;
+            }
+            pairs.add(new UUID[]{current.getUUID(), vehicle.getUUID()});
+            current = vehicle;
+        }
         return pairs;
     }
 
@@ -692,7 +705,7 @@ public class MobControlledData {
         List<UUID[]> pair = new ArrayList<>();
         pair.add(new UUID[]{mob.getUUID(), vehicleId});
         if (!tryRestoreRiding(server, pair)) {
-            PENDING_RIDING_RESTORES.put(pair, server.getTickCount() + 400L);
+            PENDING_RIDING_RESTORES.put(pair, server.getTickCount() + 1200L);
         }
     }
 
@@ -708,7 +721,7 @@ public class MobControlledData {
             return;
         }
         if (!tryRestoreRiding(server, pairs)) {
-            PENDING_RIDING_RESTORES.put(pairs, server.getTickCount() + 200L);
+            PENDING_RIDING_RESTORES.put(pairs, server.getTickCount() + 1200L);
         }
     }
 
