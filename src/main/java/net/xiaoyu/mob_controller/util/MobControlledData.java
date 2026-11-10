@@ -547,7 +547,8 @@ public class MobControlledData {
                         mobTypeId,
                         highHealthMob,
                         deathCause != null ? deathCause : "",
-                        collectPassengerIds(mob)
+                        collectPassengerIds(mob),
+                        collectRidingPairs(mob)
                 )
         );
         savePendingRespawns(server);
@@ -610,8 +611,9 @@ public class MobControlledData {
                 // ★ 重生：添加控制时跳过高生命记录（数据库已在 markAsRespawning 中保留记录）
                 addControlledMob(data.controllerUUID(), respawnedMob, true, true);
 
-                // 恢复死亡前骑在它身上的实体（保持骑乘状态）
+                // 恢复死亡前的整条骑乘链（支持 a 骑 b 骑 c 多层嵌套）
                 restorePassengers(server, respawnedMob, data.passengerIds());
+                restoreRidingPairs(server, data.ridingPairs());
 
                 // ★ 更新数据库：将旧的标记记录更新为新实体的信息 ★
                 CompoundTag newNbt = respawnedMob.saveWithoutId(new CompoundTag());
@@ -645,6 +647,83 @@ public class MobControlledData {
      * @param mob 生物
      * @return 乘客 UUID 列表
      */
+    /**
+     * 递归收集骑乘链：乘客 UUID -> 载具 UUID（支持多层嵌套）。
+     *
+     * @param mount 被骑的实体
+     * @return 骑乘对列表
+     */
+    private static List<UUID[]> collectRidingPairs(Entity mount) {
+        List<UUID[]> pairs = new ArrayList<>();
+        collectRidingPairs(mount, pairs);
+        return pairs;
+    }
+
+    private static void collectRidingPairs(Entity mount, List<UUID[]> out) {
+        for (Entity passenger : mount.getPassengers()) {
+            out.add(new UUID[]{passenger.getUUID(), mount.getUUID()});
+            collectRidingPairs(passenger, out);
+        }
+    }
+
+    /**
+     * 多轮恢复骑乘链：每轮把能骑上的骑回，直到不再变化（兼容多层嵌套与跨维度）。
+     *
+     * @param server 服务器实例
+     * @param pairs  骑乘对列表
+     */
+    private static void restoreRidingPairs(MinecraftServer server, List<UUID[]> pairs) {
+        if (pairs == null || pairs.isEmpty()) {
+            return;
+        }
+        for (int round = 0; round < 8; round++) {
+            boolean changed = false;
+            for (UUID[] pair : pairs) {
+                Entity passenger = findEntityAnywhere(server, pair[0]);
+                Entity vehicle = findEntityAnywhere(server, pair[1]);
+                if (passenger == null || vehicle == null || passenger.isRemoved() || vehicle.isRemoved()) {
+                    continue;
+                }
+                if (passenger.getVehicle() == vehicle || passenger.isPassenger()) {
+                    continue;
+                }
+                if (passenger.level() != vehicle.level()) {
+                    if (!(vehicle.level() instanceof ServerLevel vehicleLevel)) {
+                        continue;
+                    }
+                    Entity moved = passenger.changeDimension(vehicleLevel,
+                            new MobDimensionTeleporter(vehicle.getX(), vehicle.getY(), vehicle.getZ()));
+                    if (moved == null) {
+                        continue;
+                    }
+                    passenger = moved;
+                }
+                passenger.stopRiding();
+                passenger.startRiding(vehicle, true);
+                changed = true;
+            }
+            if (!changed) {
+                break;
+            }
+        }
+    }
+
+    /**
+     * 在所有已加载维度中按 UUID 找实体。
+     */
+    private static Entity findEntityAnywhere(MinecraftServer server, UUID uuid) {
+        if (server == null) {
+            return null;
+        }
+        for (ServerLevel level : server.getAllLevels()) {
+            Entity entity = level.getEntities().get(uuid);
+            if (entity != null) {
+                return entity;
+            }
+        }
+        return null;
+    }
+
     private static List<UUID> collectPassengerIds(Mob mob) {
         if (mob.getPassengers().isEmpty()) {
             return List.of();
@@ -828,6 +907,7 @@ public class MobControlledData {
                                 respawnTag.getString("mobTypeId"),
                                 respawnTag.getBoolean("highHealthMob"),
                                 deathCause,
+                                List.of(),
                                 List.of()
                         )
                 );
