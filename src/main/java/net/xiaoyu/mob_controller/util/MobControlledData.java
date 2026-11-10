@@ -687,23 +687,13 @@ public class MobControlledData {
         if (vehicleId == null || server == null) {
             return;
         }
-        Entity vehicle = findEntityAnywhere(server, vehicleId);
-        if (vehicle == null || vehicle.isRemoved() || mob.isPassenger()) {
-            return;
+        // 载具可能还没复活（例如 a、b、c 同时死亡，复活有先后），
+        // 因此失败时不放弃，而是排进重试队列，等载具出现后再骑上。
+        List<UUID[]> pair = new ArrayList<>();
+        pair.add(new UUID[]{mob.getUUID(), vehicleId});
+        if (!tryRestoreRiding(server, pair)) {
+            PENDING_RIDING_RESTORES.put(pair, server.getTickCount() + 400L);
         }
-        if (mob.level() != vehicle.level()) {
-            if (!(vehicle.level() instanceof ServerLevel vehicleLevel)) {
-                return;
-            }
-            Entity moved = mob.changeDimension(vehicleLevel,
-                    new MobDimensionTeleporter(vehicle.getX(), vehicle.getY(), vehicle.getZ()));
-            if (moved == null) {
-                return;
-            }
-            mob = (Mob) moved;
-        }
-        mob.stopRiding();
-        mob.startRiding(vehicle, true);
     }
 
     /**
