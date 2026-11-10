@@ -548,7 +548,8 @@ public class MobControlledData {
                         highHealthMob,
                         deathCause != null ? deathCause : "",
                         collectPassengerIds(mob),
-                        collectRidingPairs(mob)
+                        collectRidingPairs(mob),
+                        mob.getVehicle() != null ? mob.getVehicle().getUUID() : null
                 )
         );
         savePendingRespawns(server);
@@ -615,6 +616,8 @@ public class MobControlledData {
                 // 只走 restoreRidingPairs：它会跳过「已经骑在别的载具上」的乘客，
                 // 避免把换乘后的人硬拉回原来的坐骑。
                 restoreRidingPairs(server, data.ridingPairs());
+                // 若它死亡时正骑在别人身上（例如 a 骑 b 中的 a），复活后骑回那个载具
+                rideBackToVehicle(server, respawnedMob, data.riddenVehicleId());
 
                 // ★ 更新数据库：将旧的标记记录更新为新实体的信息 ★
                 CompoundTag newNbt = respawnedMob.saveWithoutId(new CompoundTag());
@@ -672,6 +675,36 @@ public class MobControlledData {
 
     /** 恢复失败的骑乘链，按截止 tick 排队重试（实体可能尚未加载）。 */
     private static final Map<List<UUID[]>, Long> PENDING_RIDING_RESTORES = new LinkedHashMap<>();
+
+    /**
+     * 复活后骑回死亡前所骑的载具（如果它当时是骑手）。
+     *
+     * @param server    服务器实例
+     * @param mob       复活的生物
+     * @param vehicleId 死亡时所骑载具的 UUID，可为 null
+     */
+    private static void rideBackToVehicle(MinecraftServer server, Mob mob, UUID vehicleId) {
+        if (vehicleId == null || server == null) {
+            return;
+        }
+        Entity vehicle = findEntityAnywhere(server, vehicleId);
+        if (vehicle == null || vehicle.isRemoved() || mob.isPassenger()) {
+            return;
+        }
+        if (mob.level() != vehicle.level()) {
+            if (!(vehicle.level() instanceof ServerLevel vehicleLevel)) {
+                return;
+            }
+            Entity moved = mob.changeDimension(vehicleLevel,
+                    new MobDimensionTeleporter(vehicle.getX(), vehicle.getY(), vehicle.getZ()));
+            if (moved == null) {
+                return;
+            }
+            mob = (Mob) moved;
+        }
+        mob.stopRiding();
+        mob.startRiding(vehicle, true);
+    }
 
     /**
      * 多轮恢复骑乘链：每轮把能骑上的骑回，直到不再变化（兼容多层嵌套与跨维度）。
@@ -913,7 +946,8 @@ public class MobControlledData {
                                 respawnTag.getBoolean("highHealthMob"),
                                 deathCause,
                                 List.of(),
-                                List.of()
+                                List.of(),
+                                null
                         )
                 );
             }

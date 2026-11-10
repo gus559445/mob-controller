@@ -23,6 +23,7 @@ public record PendingRespawnData(
         boolean highHealthMob,
         String deathCause,
         List<UUID> passengerIds,
-        List<UUID[]> ridingPairs
+        List<UUID[]> ridingPairs,
+        UUID riddenVehicleId
 ) {
 }
