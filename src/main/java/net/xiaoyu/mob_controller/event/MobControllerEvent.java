@@ -862,19 +862,7 @@ public class MobControllerEvent {
                     if (MobControlledData.isSystemAttack(mob) && !hasValidCombatTarget(mob)) {
                         MobControlledData.clearSystemAttack(mob);
                     }
-                }
-
-                if (mob instanceof Creeper creeper && creeper.isVehicle() && creeper.tickCount % 20 == 0) {
-                    LivingEntity dbgTarget = creeper.getTarget();
-                    LOGGER.info("[debug] rider={} target={} distSq={} ctrl={} canAttack={} noAi={}",
-                            creeper.getFirstPassenger() != null ? creeper.getFirstPassenger().getType() : "null",
-                            dbgTarget,
-                            dbgTarget != null ? (int) creeper.distanceToSqr(dbgTarget) : -1,
-                            creeper.getControllingPassenger(),
-                            dbgTarget != null && creeper.canAttack(dbgTarget),
-                            creeper.isNoAi());
-                }
-                if (!mob.level().isClientSide) {
+                }                if (!mob.level().isClientSide) {
                     mob.getCapability(MobControlCapabilityProvider.MOB_CONTROL_CAPABILITY).ifPresent(cap ->
                             NetWorkManager.INSTANCE.send(
                                     PacketDistributor.TRACKING_ENTITY_AND_SELF.with(() -> mob),

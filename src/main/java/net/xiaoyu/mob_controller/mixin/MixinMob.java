@@ -29,8 +29,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 @Mixin(Mob.class)
 public abstract class MixinMob extends LivingEntity implements Targeting {
-    private static final Logger CTRL_LOGGER = LogManager.getLogger("mob_controller-ctrl-debug");
-
 
     protected MixinMob(EntityType<? extends LivingEntity> entityType, Level level) {
         super(entityType, level);
@@ -153,12 +151,7 @@ public abstract class MixinMob extends LivingEntity implements Targeting {
     @Inject(method = "getControllingPassenger()Lnet/minecraft/world/entity/LivingEntity;", at = @At("RETURN"), cancellable = true)
     private void injectGetControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         Object thiz = this;
-        if (thiz instanceof Mob mob) {
-            if (mob.isVehicle() && mob.tickCount % 40 == 0) {
-                CTRL_LOGGER.info("[ctrl-debug] Mob entry: isVehicle={} keep={} rideable={}",
-                        mob.isVehicle(), Config.KEEP_MOUNT_AI.get(), MobControlUtil.isDirectRideableControlledMob(mob));
-            }
-            // 被骑乘时保持原版 AI：不登记驾驶者（与 MixinEntity 保持一致，
+        if (thiz instanceof Mob mob) {            // 被骑乘时保持原版 AI：不登记驾驶者（与 MixinEntity 保持一致，
             // 本注入在后者之后执行，不加这层会把控制者又写回去）
             if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
                 // 注意：必须显式置空。原版 LivingEntity.getControllingPassenger()

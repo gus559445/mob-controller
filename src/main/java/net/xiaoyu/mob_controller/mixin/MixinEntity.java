@@ -31,8 +31,6 @@ import javax.annotation.Nullable;
  */
 @Mixin(Entity.class)
 public abstract class MixinEntity implements Nameable, EntityAccess, CommandSource, IForgeEntity {
-    private static final Logger CTRL_LOGGER = LogManager.getLogger("mob_controller-ctrl-debug");
-
     /**
      * 注入 {@code isAlliedTo} 返回点：为受控实体追加同阵营判定。
      */
@@ -74,13 +72,7 @@ public abstract class MixinEntity implements Nameable, EntityAccess, CommandSour
     @Inject(method = "getControllingPassenger()Lnet/minecraft/world/entity/LivingEntity;", at = @At("RETURN"), cancellable = true)
     private void injectGetControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         Object thiz = this;
-        if (thiz instanceof LivingEntity mob) {
-            if (mob.isVehicle() && mob.tickCount % 40 == 0) {
-                CTRL_LOGGER.info("[ctrl-debug] Entity entry: isVehicle={} keep={} firstRider={}",
-                        mob.isVehicle(), Config.KEEP_MOUNT_AI.get(),
-                        mob.getFirstPassenger() != null ? mob.getFirstPassenger().getType() : "null");
-            }
-            // 被骑乘时保持原版 AI：不把乘客登记为「驾驶者」。
+        if (thiz instanceof LivingEntity mob) {            // 被骑乘时保持原版 AI：不把乘客登记为「驾驶者」。
             // 一旦 getControllingPassenger 返回非空，原版 updateControlFlags 会关闭
             // Goal.Flag.MOVE，该生物的移动与攻击 goal 全部失效
             //（表现为追敌但不攻击、苦力怕不爆炸）。配置项可关闭此行为。
