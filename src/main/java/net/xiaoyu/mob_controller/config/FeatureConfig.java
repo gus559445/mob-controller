@@ -141,6 +141,11 @@ public class FeatureConfig {
     public static final ForgeConfigSpec.BooleanValue ALLOW_CONTROLLED_MOB_RIDE;
 
     /**
+     * 实体瞬移时是否带上骑在它身上的乘客。
+     */
+    public static final ForgeConfigSpec.BooleanValue TELEPORT_KEEPS_RIDERS;
+
+    /**
      * 受控生物（及其召唤物）引发的爆炸，是否不破坏方块。
      */
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
@@ -307,6 +312,11 @@ public class FeatureConfig {
                         "留空 = 只走自动识别。")
                 .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
 
+        builder.comment("");
+
+        TELEPORT_KEEPS_RIDERS = builder
+                .comment("实体瞬移（teleportTo）时把骑在身上的乘客一起带走，避免骑乘被拆开。默认 true")
+                .define("teleport_keeps_riders", true);
         builder.comment("");
 
         ALLOW_CONTROLLED_MOB_RIDE = builder

@@ -99,7 +99,8 @@
     "cataclysm.MixinLaserBeamSafeHit",
     "mutantmore.MutantBlazeHeatMixin",
     "MixinEntityAcceptPassenger",
-    "legendarymonsters.MixinShulkerMimicTeleport"
+    "legendarymonsters.MixinShulkerMimicTeleport",
+    "MixinEntityTeleportRiders"
   ],
   "client": [],
   "server": [],

@@ -49,6 +49,7 @@ public class Config {
     public static final ForgeConfigSpec.BooleanValue PREVENT_ACCIDENTAL_PET_DAMAGE = FeatureConfig.PREVENT_ACCIDENTAL_PET_DAMAGE;
     public static final ForgeConfigSpec.BooleanValue KEEP_MOUNT_AI = FeatureConfig.KEEP_MOUNT_AI;
     public static final ForgeConfigSpec.BooleanValue ALLOW_CONTROLLED_MOB_RIDE = FeatureConfig.ALLOW_CONTROLLED_MOB_RIDE;
+    public static final ForgeConfigSpec.BooleanValue TELEPORT_KEEPS_RIDERS = FeatureConfig.TELEPORT_KEEPS_RIDERS;
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING = FeatureConfig.CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
     public static final ForgeConfigSpec.IntValue BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT = FeatureConfig.BEAST_COMPASS_DEEP_SEARCH_CHUNK_LIMIT;
     public static final ForgeConfigSpec.ConfigValue<List<? extends String>> MAX_RIDERS_PER_MOUNT = ItemConfig.MAX_RIDERS_PER_MOUNT;
