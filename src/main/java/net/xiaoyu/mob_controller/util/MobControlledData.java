@@ -639,6 +639,9 @@ public class MobControlledData {
             }
             savePendingRespawns(server);
         }
+
+        // 推进骑乘链重试队列（实体可能还没加载，需多 tick 重试）
+        tickRidingRestores(server);
     }
 
     /**
@@ -666,25 +669,63 @@ public class MobControlledData {
         }
     }
 
+    /** 恢复失败的骑乘链，按截止 tick 排队重试（实体可能尚未加载）。 */
+    private static final Map<List<UUID[]>, Long> PENDING_RIDING_RESTORES = new LinkedHashMap<>();
+
     /**
      * 多轮恢复骑乘链：每轮把能骑上的骑回，直到不再变化（兼容多层嵌套与跨维度）。
+     * 若有实体还没加载（例如在未加载区块里），会排入重试队列。
      *
      * @param server 服务器实例
      * @param pairs  骑乘对列表
      */
     private static void restoreRidingPairs(MinecraftServer server, List<UUID[]> pairs) {
-        if (pairs == null || pairs.isEmpty()) {
+        if (pairs == null || pairs.isEmpty() || server == null) {
             return;
         }
+        if (!tryRestoreRiding(server, pairs)) {
+            PENDING_RIDING_RESTORES.put(pairs, server.getTickCount() + 200L);
+        }
+    }
+
+    /**
+     * 每刻推进重试队列（由待重生 tick 调用）。
+     *
+     * @param server 服务器实例
+     */
+    private static void tickRidingRestores(MinecraftServer server) {
+        if (PENDING_RIDING_RESTORES.isEmpty()) {
+            return;
+        }
+        java.util.Iterator<Map.Entry<List<UUID[]>, Long>> it = PENDING_RIDING_RESTORES.entrySet().iterator();
+        while (it.hasNext()) {
+            Map.Entry<List<UUID[]>, Long> entry = it.next();
+            if (tryRestoreRiding(server, entry.getKey()) || server.getTickCount() > entry.getValue()) {
+                it.remove();
+            }
+        }
+    }
+
+    /**
+     * 尝试恢复一批骑乘对。
+     *
+     * @return 是否所有骑乘对都已就位（或实体已不存在）
+     */
+    private static boolean tryRestoreRiding(MinecraftServer server, List<UUID[]> pairs) {
+        boolean allResolved = true;
         for (int round = 0; round < 8; round++) {
             boolean changed = false;
             for (UUID[] pair : pairs) {
                 Entity passenger = findEntityAnywhere(server, pair[0]);
                 Entity vehicle = findEntityAnywhere(server, pair[1]);
                 if (passenger == null || vehicle == null || passenger.isRemoved() || vehicle.isRemoved()) {
+                    allResolved = false;
                     continue;
                 }
-                if (passenger.getVehicle() == vehicle || passenger.isPassenger()) {
+                if (passenger.getVehicle() == vehicle) {
+                    continue;
+                }
+                if (passenger.isPassenger()) {
                     continue;
                 }
                 if (passenger.level() != vehicle.level()) {
@@ -706,6 +747,7 @@ public class MobControlledData {
                 break;
             }
         }
+        return allResolved;
     }
 
     /**
