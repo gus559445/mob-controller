@@ -161,6 +161,9 @@ public abstract class MixinMob extends LivingEntity implements Targeting {
             // 被骑乘时保持原版 AI：不登记驾驶者（与 MixinEntity 保持一致，
             // 本注入在后者之后执行，不加这层会把控制者又写回去）
             if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+                // 注意：必须显式置空。原版 LivingEntity.getControllingPassenger()
+                // 会把第一个乘客直接当驾驶员返回，单纯 return 并不能覆盖它。
+                cir.setReturnValue(null);
                 return;
             }
             if (MobControlUtil.isDirectRideableControlledMob(mob)) {

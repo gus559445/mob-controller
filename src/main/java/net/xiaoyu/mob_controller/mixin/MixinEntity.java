@@ -85,6 +85,7 @@ public abstract class MixinEntity implements Nameable, EntityAccess, CommandSour
             // Goal.Flag.MOVE，该生物的移动与攻击 goal 全部失效
             //（表现为追敌但不攻击、苦力怕不爆炸）。配置项可关闭此行为。
             if (Config.KEEP_MOUNT_AI.get() && mob.isVehicle()) {
+                cir.setReturnValue(null);
                 return;
             }
             // 未开启该开关时，仍只允许「可骑乘」的受控生物被驾驶。
