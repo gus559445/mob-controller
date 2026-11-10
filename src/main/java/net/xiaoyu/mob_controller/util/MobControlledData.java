@@ -611,8 +611,9 @@ public class MobControlledData {
                 // ★ 重生：添加控制时跳过高生命记录（数据库已在 markAsRespawning 中保留记录）
                 addControlledMob(data.controllerUUID(), respawnedMob, true, true);
 
-                // 恢复死亡前的整条骑乘链（支持 a 骑 b 骑 c 多层嵌套）
-                restorePassengers(server, respawnedMob, data.passengerIds());
+                // 恢复死亡前的整条骑乘链（支持 a 骑 b 骑 c 多层嵌套）。
+                // 只走 restoreRidingPairs：它会跳过「已经骑在别的载具上」的乘客，
+                // 避免把换乘后的人硬拉回原来的坐骑。
                 restoreRidingPairs(server, data.ridingPairs());
 
                 // ★ 更新数据库：将旧的标记记录更新为新实体的信息 ★
@@ -775,44 +776,6 @@ public class MobControlledData {
             ids.add(passenger.getUUID());
         }
         return ids;
-    }
-
-    /**
-     * 重生后把死亡前的乘客重新骑回该生物。
-     *
-     * @param server       服务器实例
-     * @param mount        重生后的生物
-     * @param passengerIds 乘客 UUID 列表
-     */
-    private static void restorePassengers(MinecraftServer server, Mob mount, List<UUID> passengerIds) {
-        if (passengerIds == null || passengerIds.isEmpty()) {
-            return;
-        }
-        for (UUID id : passengerIds) {
-            Entity passenger = null;
-            for (ServerLevel level : server.getAllLevels()) {
-                passenger = level.getEntities().get(id);
-                if (passenger != null) {
-                    break;
-                }
-            }
-            if (passenger == null || passenger.isRemoved()) {
-                continue;
-            }
-            if (passenger.level() != mount.level()) {
-                if (!(mount.level() instanceof ServerLevel mountLevel)) {
-                    continue;
-                }
-                Entity moved = passenger.changeDimension(mountLevel,
-                        new MobDimensionTeleporter(mount.getX(), mount.getY(), mount.getZ()));
-                if (moved == null) {
-                    continue;
-                }
-                passenger = moved;
-            }
-            passenger.stopRiding();
-            passenger.startRiding(mount, true);
-        }
     }
 
     private static void resetBossPhaseIfNeeded(Mob mob) {
