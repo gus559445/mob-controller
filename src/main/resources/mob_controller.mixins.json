@@ -97,7 +97,8 @@
     "cataclysm.MixinMaledictusNoRespawner",
     "cataclysm.MixinBossReturnToHome",
     "cataclysm.MixinLaserBeamSafeHit",
-    "mutantmore.MutantBlazeHeatMixin"
+    "mutantmore.MutantBlazeHeatMixin",
+    "MixinEntityAcceptPassenger"
   ],
   "client": [],
   "server": [],

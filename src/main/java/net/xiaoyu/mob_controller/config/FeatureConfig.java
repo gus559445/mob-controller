@@ -136,6 +136,11 @@ public class FeatureConfig {
     public static final ForgeConfigSpec.BooleanValue KEEP_MOUNT_AI;
 
     /**
+     * 是否允许受控生物被骑乘（包括本来拒绝乘客的模组生物）。
+     */
+    public static final ForgeConfigSpec.BooleanValue ALLOW_CONTROLLED_MOB_RIDE;
+
+    /**
      * 受控生物（及其召唤物）引发的爆炸，是否不破坏方块。
      */
     public static final ForgeConfigSpec.BooleanValue CONTROLLED_MINION_EXPLOSION_NO_GRIEFING;
@@ -302,6 +307,12 @@ public class FeatureConfig {
                         "留空 = 只走自动识别。")
                 .defineList("controlled_minion_entities", List.of(), obj -> obj instanceof String);
 
+        builder.comment("");
+
+        ALLOW_CONTROLLED_MOB_RIDE = builder
+                .comment("允许受控生物被骑乘。部分模组生物（如传说怪物的潜影拟态者）默认拒绝乘客，",
+                        "开启后可用骑乘令等让它们充当坐骑。默认 true")
+                .define("allow_controlled_mob_ride", true);
         builder.comment("");
 
         KEEP_MOUNT_AI = builder
