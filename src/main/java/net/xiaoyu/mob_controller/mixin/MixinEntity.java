@@ -1,5 +1,7 @@
 package net.xiaoyu.mob_controller.mixin;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import net.xiaoyu.mob_controller.Config;
 import net.minecraft.commands.CommandSource;
 import net.minecraft.world.Nameable;
@@ -29,6 +31,8 @@ import javax.annotation.Nullable;
  */
 @Mixin(Entity.class)
 public abstract class MixinEntity implements Nameable, EntityAccess, CommandSource, IForgeEntity {
+    private static final Logger CTRL_LOGGER = LogManager.getLogger("mob_controller-ctrl-debug");
+
     /**
      * 注入 {@code isAlliedTo} 返回点：为受控实体追加同阵营判定。
      */
@@ -71,6 +75,11 @@ public abstract class MixinEntity implements Nameable, EntityAccess, CommandSour
     private void injectGetControllingPassenger(CallbackInfoReturnable<LivingEntity> cir) {
         Object thiz = this;
         if (thiz instanceof LivingEntity mob) {
+            if (mob.isVehicle() && mob.tickCount % 40 == 0) {
+                CTRL_LOGGER.info("[ctrl-debug] Entity entry: isVehicle={} keep={} firstRider={}",
+                        mob.isVehicle(), Config.KEEP_MOUNT_AI.get(),
+                        mob.getFirstPassenger() != null ? mob.getFirstPassenger().getType() : "null");
+            }
             // 被骑乘时保持原版 AI：不把乘客登记为「驾驶者」。
             // 一旦 getControllingPassenger 返回非空，原版 updateControlFlags 会关闭
             // Goal.Flag.MOVE，该生物的移动与攻击 goal 全部失效
